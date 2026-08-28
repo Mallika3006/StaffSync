@@ -1,6 +1,5 @@
 package com.mallika.EmployeeManagementSystem;
 
-import com.mallika.EmployeeManagementSystem.controller.TestController;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
