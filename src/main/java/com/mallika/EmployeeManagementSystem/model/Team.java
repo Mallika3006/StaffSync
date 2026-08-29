@@ -28,6 +28,11 @@ public class Team {
     @OneToMany(mappedBy = "team")
     private List<Employee> employees;
 
-    @OneToMany(mappedBy = "team")
-    private List<TeamProject> teamProjects;
+    @ManyToMany
+    @JoinTable(
+            name="team_project",
+            joinColumns = @JoinColumn(name="team_id"),
+            inverseJoinColumns = @JoinColumn(name="project_id")
+    )
+    private List<Project> projects;
 }

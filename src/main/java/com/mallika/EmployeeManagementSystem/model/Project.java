@@ -27,6 +27,6 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Task> tasks;
 
-    @OneToMany(mappedBy = "project")
-    private List<TeamProject> teamProjects;
+    @ManyToMany(mappedBy = "projects")
+    private List<Team> teams;
 }

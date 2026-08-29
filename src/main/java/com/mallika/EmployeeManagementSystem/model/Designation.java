@@ -1,5 +1,6 @@
 package com.mallika.EmployeeManagementSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,5 +25,6 @@ public class Designation {
     private BigDecimal maxSalary;
 
     @OneToMany(mappedBy = "designation")
+    @JsonIgnore
     private List<Employee> employees;
 }
