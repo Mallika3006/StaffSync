@@ -29,7 +29,4 @@ public class Leave {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @ManyToOne
-    @JoinColumn(name = "leave_type_id")
-    private LeaveType leaveType;
 }

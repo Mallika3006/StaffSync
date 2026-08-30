@@ -50,9 +50,6 @@ public class Employee {
     @OneToMany(mappedBy = "employee")
     private List<Leave> leaves;
 
-    @OneToMany(mappedBy = "employee")
-    private List<Dependent> dependents;
-
     @OneToOne(mappedBy = "employee")
     private User user;
 }
