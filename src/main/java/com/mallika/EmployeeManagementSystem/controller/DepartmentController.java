@@ -2,6 +2,7 @@ package com.mallika.EmployeeManagementSystem.controller;
 
 import com.mallika.EmployeeManagementSystem.model.Department;
 import com.mallika.EmployeeManagementSystem.service.DepartmentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +17,7 @@ public class DepartmentController {
     DepartmentService departmentService;
 
     @PostMapping
-    public Department addDepartment(@RequestBody Department department) {
+    public Department addDepartment(@Valid @RequestBody Department department) {
         return departmentService.save(department);
     }
 
