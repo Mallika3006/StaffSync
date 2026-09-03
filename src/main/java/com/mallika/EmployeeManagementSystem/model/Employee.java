@@ -52,4 +52,6 @@ public class Employee {
 
     @OneToOne(mappedBy = "employee")
     private User user;
+
+
 }
