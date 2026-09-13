@@ -1,12 +1,7 @@
 package com.mallika.EmployeeManagementSystem.controller;
 
-import com.mallika.EmployeeManagementSystem.dto.EmployeeRequestDTO;
-import com.mallika.EmployeeManagementSystem.dto.EmployeeResponseDTO;
-import com.mallika.EmployeeManagementSystem.exception.EmployeeNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.service.EmployeeService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,78 +12,110 @@ import java.util.List;
 @RequestMapping("/employees")
 public class EmployeeController {
 
-    @Autowired
-    EmployeeService employeeService;
+    private final EmployeeService employeeService;
 
-    @ExceptionHandler(EmployeeNotFoundException.class)
-    public ResponseEntity<String> handleEmployeeNotFound(
-            EmployeeNotFoundException ex) {
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
-        return new ResponseEntity<>(
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND
+    // CREATE
+    @PostMapping
+    public ResponseEntity<Employee> createEmployee(
+            @RequestBody Employee employee) {
+
+        Employee savedEmployee = employeeService.createEmployee(employee);
+
+        return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
+    }
+
+    // GET ALL
+    @GetMapping
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+
+        return ResponseEntity.ok(
+                employeeService.getAllEmployees()
         );
     }
 
-    @PostMapping
-    public ResponseEntity<EmployeeResponseDTO> createEmployee(
-            @Valid @RequestBody EmployeeRequestDTO dto) {
+    // GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getEmployeeById(
+            @PathVariable Integer id) {
 
-        EmployeeResponseDTO employee = employeeService.createEmployee(dto);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(employee);
+        return ResponseEntity.ok(
+                employeeService.getEmployeeById(id)
+        );
     }
 
+    // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeResponseDTO> updateEmployee(
+    public ResponseEntity<Employee> updateEmployee(
             @PathVariable Integer id,
-            @Valid @RequestBody EmployeeRequestDTO dto) {
+            @RequestBody Employee employee) {
 
-        return ResponseEntity.ok(employeeService.updateEmployee(id, dto));
+        return ResponseEntity.ok(
+                employeeService.updateEmployee(id, employee)
+        );
     }
 
-    @GetMapping
-    public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployees() {
-        return ResponseEntity.ok(employeeService.getAllEmployees());
-    }
-
+    // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteEmployee(
+            @PathVariable Integer id) {
 
         employeeService.deleteEmployee(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Employee deleted successfully");
     }
 
+    // SEARCH BY NAME
     @GetMapping("/search")
-    public ResponseEntity<List<Employee>> searchEmployees(
-            @RequestParam String firstName) {
+    public ResponseEntity<List<Employee>> searchEmployee(
+            @RequestParam String name) {
 
         return ResponseEntity.ok(
-                employeeService.searchEmployeesByFirstName(firstName)
+                employeeService.searchByName(name)
         );
     }
-    @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id){
-        return employeeService.getById(id);
-    }
 
-    @GetMapping("/filter")
-    public ResponseEntity<List<Employee>> filterEmployees(
+    // SEARCH BY EMAIL
+    @GetMapping("/email")
+    public ResponseEntity<Employee> getEmployeeByEmail(
             @RequestParam String email) {
 
         return ResponseEntity.ok(
-                employeeService.filterEmployeesByEmail(email)
+                employeeService.getEmployeeByEmail(email)
         );
     }
 
-    @GetMapping("/sort")
-    public ResponseEntity<List<Employee>> sortEmployees() {
+    // FILTER BY DESIGNATION
+    @GetMapping("/designation/{designationId}")
+    public ResponseEntity<List<Employee>> getEmployeesByDesignation(
+            @PathVariable Integer designationId) {
 
         return ResponseEntity.ok(
-                employeeService.sortEmployeesByFirstName()
+                employeeService.getEmployeesByDesignation(designationId)
+        );
+    }
+
+    // FILTER BY TEAM
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<List<Employee>> getEmployeesByTeam(
+            @PathVariable Integer teamId) {
+
+        return ResponseEntity.ok(
+                employeeService.getEmployeesByTeam(teamId)
+        );
+    }
+
+    // SORT
+    @GetMapping("/sort")
+    public ResponseEntity<List<Employee>> getEmployeesSorted(
+            @RequestParam(defaultValue = "firstName") String field,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        return ResponseEntity.ok(
+                employeeService.getEmployeesSorted(field, direction)
         );
     }
 }

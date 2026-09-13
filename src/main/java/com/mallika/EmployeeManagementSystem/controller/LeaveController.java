@@ -1,0 +1,144 @@
+package com.mallika.EmployeeManagementSystem.controller;
+
+import com.mallika.EmployeeManagementSystem.model.Leave;
+import com.mallika.EmployeeManagementSystem.service.LeaveService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/leaves")
+public class LeaveController {
+
+    private final LeaveService leaveService;
+
+    public LeaveController(LeaveService leaveService) {
+        this.leaveService = leaveService;
+    }
+
+    // CREATE
+    @PostMapping
+    public ResponseEntity<Leave> createLeave(
+            @RequestBody Leave leave) {
+
+        Leave savedLeave = leaveService.createLeave(leave);
+
+        return new ResponseEntity<>(
+                savedLeave,
+                HttpStatus.CREATED
+        );
+    }
+
+    // GET ALL
+    @GetMapping
+    public ResponseEntity<List<Leave>> getAllLeaves() {
+
+        return ResponseEntity.ok(
+                leaveService.getAllLeaves()
+        );
+    }
+
+    // GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Leave> getLeaveById(
+            @PathVariable Integer id) {
+
+        return ResponseEntity.ok(
+                leaveService.getLeaveById(id)
+        );
+    }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<Leave> updateLeave(
+            @PathVariable Integer id,
+            @RequestBody Leave leave) {
+
+        return ResponseEntity.ok(
+                leaveService.updateLeave(id, leave)
+        );
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteLeave(
+            @PathVariable Integer id) {
+
+        leaveService.deleteLeave(id);
+
+        return ResponseEntity.ok(
+                "Leave deleted successfully"
+        );
+    }
+
+    // GET BY EMPLOYEE
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<Leave>> getLeavesByEmployee(
+            @PathVariable Integer employeeId) {
+
+        return ResponseEntity.ok(
+                leaveService.getLeavesByEmployee(employeeId)
+        );
+    }
+
+    // GET BY STATUS
+    @GetMapping("/status")
+    public ResponseEntity<List<Leave>> getLeavesByStatus(
+            @RequestParam String status) {
+
+        return ResponseEntity.ok(
+                leaveService.getLeavesByStatus(status)
+        );
+    }
+
+    // GET EMPLOYEE LEAVES BY STATUS
+    @GetMapping("/employee/{employeeId}/status")
+    public ResponseEntity<List<Leave>> getEmployeeLeavesByStatus(
+            @PathVariable Integer employeeId,
+            @RequestParam String status) {
+
+        return ResponseEntity.ok(
+                leaveService.getEmployeeLeavesByStatus(
+                        employeeId,
+                        status
+                )
+        );
+    }
+
+    // GET BY FROM DATE
+    @GetMapping("/from-date")
+    public ResponseEntity<List<Leave>> getLeavesByFromDate(
+            @RequestParam LocalDate fromDate) {
+
+        return ResponseEntity.ok(
+                leaveService.getLeavesByFromDate(fromDate)
+        );
+    }
+
+    // GET BY TO DATE
+    @GetMapping("/to-date")
+    public ResponseEntity<List<Leave>> getLeavesByToDate(
+            @RequestParam LocalDate toDate) {
+
+        return ResponseEntity.ok(
+                leaveService.getLeavesByToDate(toDate)
+        );
+    }
+
+    // GET LEAVES BETWEEN DATES
+    @GetMapping("/between")
+    public ResponseEntity<List<Leave>> getLeavesBetweenDates(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        return ResponseEntity.ok(
+                leaveService.getLeavesBetweenDates(
+                        startDate,
+                        endDate
+                )
+        );
+    }
+}

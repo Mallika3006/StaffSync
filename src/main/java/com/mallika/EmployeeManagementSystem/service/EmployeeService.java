@@ -1,12 +1,9 @@
 package com.mallika.EmployeeManagementSystem.service;
 
-import com.mallika.EmployeeManagementSystem.dto.EmployeeRequestDTO;
-import com.mallika.EmployeeManagementSystem.dto.EmployeeResponseDTO;
-import com.mallika.EmployeeManagementSystem.exception.EmployeeNotFoundException;
+import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.repository.EmployeeRepository;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,152 +11,104 @@ import java.util.List;
 @Service
 public class EmployeeService {
 
-    @Autowired
-    EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
 
+    public EmployeeService(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
 
-    public Employee save(EmployeeRequestDTO dto) {
-
-        Employee employee = new Employee();
-
-        employee.setFirstName(dto.getFirstName());
-        employee.setLastName(dto.getLastName());
-        employee.setEmail(dto.getEmail());
-        employee.setPhone(dto.getPhone());
-        employee.setDateOfBirth(dto.getDateOfBirth());
-        employee.setHireDate(dto.getHireDate());
-        employee.setAddress(dto.getAddress());
-
+    // CREATE
+    public Employee createEmployee(Employee employee) {
         return employeeRepository.save(employee);
     }
 
-    public Employee getById(Long id) {
+    // GET ALL
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    // GET BY ID
+    public Employee getEmployeeById(Integer id) {
         return employeeRepository.findById(id)
                 .orElseThrow(() ->
-                        new EmployeeNotFoundException(
+                        new ResourceNotFoundException(
                                 "Employee not found with id: " + id
                         ));
     }
 
-    public List<EmployeeResponseDTO> getAllEmployees() {
+    // UPDATE
+    public Employee updateEmployee(Integer id, Employee employeeDetails) {
 
-        return employeeRepository.findAll()
-                .stream()
-                .map(employee -> {
+        Employee employee = getEmployeeById(id);
 
-                    EmployeeResponseDTO dto = new EmployeeResponseDTO();
+        employee.setFirstName(employeeDetails.getFirstName());
+        employee.setLastName(employeeDetails.getLastName());
+        employee.setEmail(employeeDetails.getEmail());
+        employee.setPhone(employeeDetails.getPhone());
+        employee.setDateOfBirth(employeeDetails.getDateOfBirth());
+        employee.setHireDate(employeeDetails.getHireDate());
+        employee.setAddress(employeeDetails.getAddress());
+        employee.setDesignation(employeeDetails.getDesignation());
+        employee.setTeam(employeeDetails.getTeam());
 
-                    dto.setEmployeeId(
-                            employee.getEmployeeId() != null
-                                    ? employee.getEmployeeId().longValue()
-                                    : null
-                    );
-
-                    dto.setFirstName(employee.getFirstName());
-                    dto.setLastName(employee.getLastName());
-                    dto.setEmail(employee.getEmail());
-                    dto.setPhone(employee.getPhone());
-                    dto.setDateOfBirth(employee.getDateOfBirth());
-                    dto.setHireDate(employee.getHireDate());
-                    dto.setAddress(employee.getAddress());
-
-                    if (employee.getDesignation() != null) {
-                        dto.setDesignationId(
-                                employee.getDesignation()
-                                        .getDesignationId()
-                                        .longValue()
-                        );
-                    }
-
-                    if (employee.getTeam() != null) {
-                        dto.setTeamId(
-                                employee.getTeam()
-                                        .getTeamId()
-                                        .longValue()
-                        );
-                    }
-
-                    return dto;
-                })
-                .toList();
+        return employeeRepository.save(employee);
     }
 
-    public EmployeeResponseDTO createEmployee(EmployeeRequestDTO dto) {
-
-        Employee employee = new Employee();
-
-        employee.setFirstName(dto.getFirstName());
-        employee.setLastName(dto.getLastName());
-        employee.setEmail(dto.getEmail());
-        employee.setPhone(dto.getPhone());
-        employee.setDateOfBirth(dto.getDateOfBirth());
-        employee.setHireDate(dto.getHireDate());
-        employee.setAddress(dto.getAddress());
-
-        Employee savedEmployee = employeeRepository.save(employee);
-
-        EmployeeResponseDTO response = new EmployeeResponseDTO();
-
-        response.setEmployeeId(savedEmployee.getEmployeeId().longValue());
-        response.setFirstName(savedEmployee.getFirstName());
-        response.setLastName(savedEmployee.getLastName());
-        response.setEmail(savedEmployee.getEmail());
-        response.setPhone(savedEmployee.getPhone());
-        response.setDateOfBirth(savedEmployee.getDateOfBirth());
-        response.setHireDate(savedEmployee.getHireDate());
-        response.setAddress(savedEmployee.getAddress());
-
-        return response;
-    }
+    // DELETE
     public void deleteEmployee(Integer id) {
 
-        Employee employee = employeeRepository.findById(Long.valueOf(id))
-                .orElseThrow(() ->
-                        new EmployeeNotFoundException(
-                                "Employee not found with id: " + id));
+        Employee employee = getEmployeeById(id);
 
         employeeRepository.delete(employee);
     }
 
-    public EmployeeResponseDTO updateEmployee(Integer id, EmployeeRequestDTO dto) {
-
-        Employee employee = employeeRepository.findById(Long.valueOf(id))
-                .orElseThrow(() ->
-                        new EmployeeNotFoundException("Employee not found with id: " + id));
-
-        employee.setFirstName(dto.getFirstName());
-        employee.setLastName(dto.getLastName());
-        employee.setEmail(dto.getEmail());
-        employee.setPhone(dto.getPhone());
-        employee.setDateOfBirth(dto.getDateOfBirth());
-        employee.setHireDate(dto.getHireDate());
-        employee.setAddress(dto.getAddress());
-
-        Employee updatedEmployee = employeeRepository.save(employee);
-
-        EmployeeResponseDTO response = new EmployeeResponseDTO();
-
-        response.setEmployeeId(updatedEmployee.getEmployeeId().longValue());
-        response.setFirstName(updatedEmployee.getFirstName());
-        response.setLastName(updatedEmployee.getLastName());
-        response.setEmail(updatedEmployee.getEmail());
-        response.setPhone(updatedEmployee.getPhone());
-        response.setDateOfBirth(updatedEmployee.getDateOfBirth());
-        response.setHireDate(updatedEmployee.getHireDate());
-        response.setAddress(updatedEmployee.getAddress());
-
-        return response;
-    }
-
-    public List<Employee> filterEmployeesByEmail(String email) {
-        return employeeRepository.findByEmailContainingIgnoreCase(email);
-    }
-
-    public List<Employee> sortEmployeesByFirstName() {
-        return employeeRepository.findAllByOrderByFirstNameAsc();
-    }
-
-    public List<Employee> searchEmployeesByFirstName(String firstName) {
+    // SEARCH BY FIRST NAME
+    public List<Employee> searchByFirstName(String firstName) {
         return employeeRepository.findByFirstNameContainingIgnoreCase(firstName);
+    }
+
+    // SEARCH BY LAST NAME
+    public List<Employee> searchByLastName(String lastName) {
+        return employeeRepository.findByLastNameContainingIgnoreCase(lastName);
+    }
+
+    // SEARCH BY NAME
+    public List<Employee> searchByName(String name) {
+        return employeeRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+                        name, name
+                );
+    }
+
+    // SEARCH BY EMAIL
+    public Employee getEmployeeByEmail(String email) {
+        return employeeRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Employee not found with email: " + email
+                        ));
+    }
+    // FILTER BY DESIGNATION
+    public List<Employee> getEmployeesByDesignation(Integer designationId) {
+        return employeeRepository.findByDesignationDesignationId(designationId);
+    }
+
+    // FILTER BY TEAM
+    public List<Employee> getEmployeesByTeam(Integer teamId) {
+        return employeeRepository.findByTeamTeamId(teamId);
+    }
+
+    // SORT
+    public List<Employee> getEmployeesSorted(String field, String direction) {
+
+        Sort sort;
+
+        if (direction.equalsIgnoreCase("desc")) {
+            sort = Sort.by(field).descending();
+        } else {
+            sort = Sort.by(field).ascending();
+        }
+
+        return employeeRepository.findAll(sort);
     }
 }
