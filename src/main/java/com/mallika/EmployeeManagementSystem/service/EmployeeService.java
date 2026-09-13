@@ -150,4 +150,16 @@ public class EmployeeService {
 
         return response;
     }
+
+    public List<Employee> filterEmployeesByEmail(String email) {
+        return employeeRepository.findByEmailContainingIgnoreCase(email);
+    }
+
+    public List<Employee> sortEmployeesByFirstName() {
+        return employeeRepository.findAllByOrderByFirstNameAsc();
+    }
+
+    public List<Employee> searchEmployeesByFirstName(String firstName) {
+        return employeeRepository.findByFirstNameContainingIgnoreCase(firstName);
+    }
 }

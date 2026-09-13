@@ -61,8 +61,34 @@ public class EmployeeController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Employee>> searchEmployees(
+            @RequestParam String firstName) {
+
+        return ResponseEntity.ok(
+                employeeService.searchEmployeesByFirstName(firstName)
+        );
+    }
     @GetMapping("/{id}")
     public Employee getEmployeeById(@PathVariable Long id){
         return employeeService.getById(id);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<Employee>> filterEmployees(
+            @RequestParam String email) {
+
+        return ResponseEntity.ok(
+                employeeService.filterEmployeesByEmail(email)
+        );
+    }
+
+    @GetMapping("/sort")
+    public ResponseEntity<List<Employee>> sortEmployees() {
+
+        return ResponseEntity.ok(
+                employeeService.sortEmployeesByFirstName()
+        );
     }
 }
