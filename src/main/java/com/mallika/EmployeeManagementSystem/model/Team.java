@@ -1,6 +1,6 @@
 package com.mallika.EmployeeManagementSystem.model;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,13 +26,15 @@ public class Team {
     private Department department;
 
     @OneToMany(mappedBy = "team")
+    @JsonIgnore
     private List<Employee> employees;
 
     @ManyToMany
     @JoinTable(
-            name="team_project",
-            joinColumns = @JoinColumn(name="team_id"),
-            inverseJoinColumns = @JoinColumn(name="project_id")
+            name = "team_project",
+            joinColumns = @JoinColumn(name = "team_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id")
     )
+    @JsonIgnore
     private List<Project> projects;
 }

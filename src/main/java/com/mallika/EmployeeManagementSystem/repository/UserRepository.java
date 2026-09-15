@@ -11,8 +11,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // Exact username
     Optional<User> findByUsernameIgnoreCase(String username);
 
+    Optional<User> findByUsername(String username);
+
     // Search username
-    List<User> findByUsernameContainingIgnoreCase(String username);
+     List<User> findByUsernameContainingIgnoreCase(String username);
 
     // Active / inactive users
     List<User> findByIsActive(Boolean isActive);

@@ -4,6 +4,7 @@ import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.service.EmployeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +24,13 @@ public class EmployeeController {
     public ResponseEntity<Employee> createEmployee(
             @RequestBody Employee employee) {
 
-        Employee savedEmployee = employeeService.createEmployee(employee);
+        Employee savedEmployee =
+                employeeService.createEmployee(employee);
 
-        return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                savedEmployee,
+                HttpStatus.CREATED
+        );
     }
 
     // GET ALL
@@ -35,6 +40,19 @@ public class EmployeeController {
         return ResponseEntity.ok(
                 employeeService.getAllEmployees()
         );
+    }
+
+    // GET LOGGED-IN EMPLOYEE
+    @GetMapping("/me")
+    public ResponseEntity<Employee> getMyProfile(
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        Employee employee =
+                employeeService.getMyProfile(username);
+
+        return ResponseEntity.ok(employee);
     }
 
     // GET BY ID
@@ -65,7 +83,9 @@ public class EmployeeController {
 
         employeeService.deleteEmployee(id);
 
-        return ResponseEntity.ok("Employee deleted successfully");
+        return ResponseEntity.ok(
+                "Employee deleted successfully"
+        );
     }
 
     // SEARCH BY NAME

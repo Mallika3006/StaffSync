@@ -1,5 +1,6 @@
 package com.mallika.EmployeeManagementSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,16 +43,18 @@ public class Employee {
     private Team team;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private List<Attendance> attendanceList;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private List<Payroll> payrolls;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private List<Leave> leaves;
 
     @OneToOne(mappedBy = "employee")
+    @JsonIgnore
     private User user;
-
-
 }

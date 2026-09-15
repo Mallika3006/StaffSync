@@ -2,7 +2,9 @@ package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Employee;
+import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.EmployeeRepository;
+import com.mallika.EmployeeManagementSystem.repository.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,14 @@ import java.util.List;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(
+            EmployeeRepository employeeRepository,
+            UserRepository userRepository) {
+
         this.employeeRepository = employeeRepository;
+        this.userRepository = userRepository;
     }
 
     // CREATE
@@ -34,6 +41,18 @@ public class EmployeeService {
                         new ResourceNotFoundException(
                                 "Employee not found with id: " + id
                         ));
+    }
+
+    // GET LOGGED-IN EMPLOYEE
+    public Employee getMyProfile(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found: " + username
+                        ));
+
+        return user.getEmployee();
     }
 
     // UPDATE
@@ -64,12 +83,14 @@ public class EmployeeService {
 
     // SEARCH BY FIRST NAME
     public List<Employee> searchByFirstName(String firstName) {
-        return employeeRepository.findByFirstNameContainingIgnoreCase(firstName);
+        return employeeRepository
+                .findByFirstNameContainingIgnoreCase(firstName);
     }
 
     // SEARCH BY LAST NAME
     public List<Employee> searchByLastName(String lastName) {
-        return employeeRepository.findByLastNameContainingIgnoreCase(lastName);
+        return employeeRepository
+                .findByLastNameContainingIgnoreCase(lastName);
     }
 
     // SEARCH BY NAME
@@ -88,18 +109,23 @@ public class EmployeeService {
                                 "Employee not found with email: " + email
                         ));
     }
+
     // FILTER BY DESIGNATION
     public List<Employee> getEmployeesByDesignation(Integer designationId) {
-        return employeeRepository.findByDesignationDesignationId(designationId);
+        return employeeRepository
+                .findByDesignationDesignationId(designationId);
     }
 
     // FILTER BY TEAM
     public List<Employee> getEmployeesByTeam(Integer teamId) {
-        return employeeRepository.findByTeamTeamId(teamId);
+        return employeeRepository
+                .findByTeamTeamId(teamId);
     }
 
     // SORT
-    public List<Employee> getEmployeesSorted(String field, String direction) {
+    public List<Employee> getEmployeesSorted(
+            String field,
+            String direction) {
 
         Sort sort;
 

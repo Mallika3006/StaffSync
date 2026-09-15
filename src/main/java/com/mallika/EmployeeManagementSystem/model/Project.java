@@ -1,5 +1,6 @@
 package com.mallika.EmployeeManagementSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,8 +26,10 @@ public class Project {
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Task> tasks;
 
     @ManyToMany(mappedBy = "projects")
+    @JsonIgnore
     private List<Team> teams;
 }
