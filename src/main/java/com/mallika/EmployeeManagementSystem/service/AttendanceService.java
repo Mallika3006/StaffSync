@@ -2,7 +2,11 @@ package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Attendance;
+import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.AttendanceRepository;
+import com.mallika.EmployeeManagementSystem.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,9 +16,14 @@ import java.util.List;
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
+    private final UserRepository userRepository;
 
-    public AttendanceService(AttendanceRepository attendanceRepository) {
+    public AttendanceService(
+            AttendanceRepository attendanceRepository,
+            UserRepository userRepository) {
+
         this.attendanceRepository = attendanceRepository;
+        this.userRepository = userRepository;
     }
 
     // CREATE
@@ -102,5 +111,26 @@ public class AttendanceService {
                         employeeId,
                         status
                 );
+    }
+
+    // GET LOGGED-IN EMPLOYEE'S ATTENDANCE
+    public List<Attendance> getMyAttendance() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found"
+                        ));
+
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+        return attendanceRepository
+                .findByEmployeeEmployeeId(employeeId);
     }
 }

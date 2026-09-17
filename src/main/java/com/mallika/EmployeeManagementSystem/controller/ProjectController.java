@@ -39,6 +39,13 @@ public class ProjectController {
         );
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<Project>> getMyProjects() {
+        return ResponseEntity.ok(
+                projectService.getMyProjects()
+        );
+    }
+
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Project> getProjectById(

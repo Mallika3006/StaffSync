@@ -2,8 +2,12 @@ package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Project;
+import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.ProjectRepository;
+import com.mallika.EmployeeManagementSystem.repository.UserRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,11 +17,15 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(
+            ProjectRepository projectRepository,
+            UserRepository userRepository) {
+
         this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
     }
-
     // CREATE
     public Project createProject(Project project) {
         return projectRepository.save(project);
@@ -105,5 +113,32 @@ public class ProjectService {
                 : Sort.by(field).ascending();
 
         return projectRepository.findAll(sort);
+    }
+
+    // GET PROJECTS OF LOGGED-IN EMPLOYEE'S TEAM
+    public List<Project> getMyProjects() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found"
+                        ));
+
+        if (user.getEmployee() == null ||
+                user.getEmployee().getTeam() == null) {
+
+            throw new ResourceNotFoundException(
+                    "Employee or team not found"
+            );
+        }
+
+        return user.getEmployee()
+                .getTeam()
+                .getProjects();
     }
 }

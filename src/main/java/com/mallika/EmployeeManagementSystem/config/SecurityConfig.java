@@ -38,6 +38,13 @@ public class SecurityConfig {
 
                         // EMPLOYEE → only their own profile
                         .requestMatchers("/employees/me").hasRole("EMPLOYEE")
+                        .requestMatchers("/attendance/me").hasRole("EMPLOYEE")
+                        .requestMatchers("/leaves/me").hasRole("EMPLOYEE")
+                        .requestMatchers("/payrolls/me").hasRole("EMPLOYEE")
+                        .requestMatchers("/projects/me").hasRole("EMPLOYEE")
+                        .requestMatchers("/tasks/me").hasRole("EMPLOYEE")
+                        .requestMatchers("/teams/me/members").hasRole("EMPLOYEE")
+                        .requestMatchers("/departments/me").hasRole("EMPLOYEE")
 
                         // ADMIN + HR
                         .requestMatchers("/employees/**").hasAnyRole("ADMIN", "HR")
@@ -45,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/designations/**").hasAnyRole("ADMIN", "HR")
                         .requestMatchers("/attendance/**").hasAnyRole("ADMIN", "HR")
                         .requestMatchers("/leaves/**").hasAnyRole("ADMIN", "HR")
-                        .requestMatchers("/payroll/**").hasAnyRole("ADMIN", "HR")
+                        .requestMatchers("/payrolls/**").hasAnyRole("ADMIN", "HR")
 
                         // ADMIN + HR + MANAGER
                         .requestMatchers("/teams/**").hasAnyRole("ADMIN", "HR", "MANAGER")

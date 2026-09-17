@@ -41,6 +41,15 @@ public class LeaveController {
         );
     }
 
+    // GET LOGGED-IN EMPLOYEE'S LEAVES
+    @GetMapping("/me")
+    public ResponseEntity<List<Leave>> getMyLeaves() {
+
+        return ResponseEntity.ok(
+                leaveService.getMyLeaves()
+        );
+    }
+
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Leave> getLeaveById(

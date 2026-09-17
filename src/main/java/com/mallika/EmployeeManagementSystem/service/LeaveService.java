@@ -2,7 +2,11 @@ package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Leave;
+import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.LeaveRepository;
+import com.mallika.EmployeeManagementSystem.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,9 +16,14 @@ import java.util.List;
 public class LeaveService {
 
     private final LeaveRepository leaveRepository;
+    private final UserRepository userRepository;
 
-    public LeaveService(LeaveRepository leaveRepository) {
+    public LeaveService(
+            LeaveRepository leaveRepository,
+            UserRepository userRepository) {
+
         this.leaveRepository = leaveRepository;
+        this.userRepository = userRepository;
     }
 
     // CREATE
@@ -107,5 +116,26 @@ public class LeaveService {
                 startDate,
                 endDate
         );
+    }
+
+    // GET LOGGED-IN EMPLOYEE'S LEAVES
+    public List<Leave> getMyLeaves() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found"
+                        ));
+
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+        return leaveRepository
+                .findByEmployeeEmployeeId(employeeId);
     }
 }

@@ -39,6 +39,13 @@ public class TaskController {
         );
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<Task>> getMyTasks() {
+        return ResponseEntity.ok(
+                taskService.getMyTasks()
+        );
+    }
+
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTaskById(

@@ -4,6 +4,7 @@ import com.mallika.EmployeeManagementSystem.model.Department;
 import com.mallika.EmployeeManagementSystem.service.DepartmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -101,6 +102,18 @@ public class DepartmentController {
 
         return ResponseEntity.ok(
                 departmentService.getDepartmentsByLocation(location)
+        );
+    }
+
+    // GET LOGGED-IN EMPLOYEE'S DEPARTMENT
+    @GetMapping("/me")
+    public ResponseEntity<Department> getMyDepartment(
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        return ResponseEntity.ok(
+                departmentService.getDepartmentByUsername(username)
         );
     }
 }

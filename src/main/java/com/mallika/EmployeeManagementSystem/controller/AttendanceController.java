@@ -42,6 +42,15 @@ public class AttendanceController {
         );
     }
 
+    // GET LOGGED-IN EMPLOYEE'S ATTENDANCE
+    @GetMapping("/me")
+    public ResponseEntity<List<Attendance>> getMyAttendance() {
+
+        return ResponseEntity.ok(
+                attendanceService.getMyAttendance()
+        );
+    }
+
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Attendance> getAttendanceById(

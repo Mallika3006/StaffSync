@@ -42,6 +42,15 @@ public class PayrollController {
         );
     }
 
+    // GET LOGGED-IN EMPLOYEE'S PAYROLL
+    @GetMapping("/me")
+    public ResponseEntity<List<Payroll>> getMyPayrolls() {
+
+        return ResponseEntity.ok(
+                payrollService.getMyPayrolls()
+        );
+    }
+
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Payroll> getPayrollById(

@@ -2,7 +2,11 @@ package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Payroll;
+import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.PayrollRepository;
+import com.mallika.EmployeeManagementSystem.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,9 +16,14 @@ import java.util.List;
 public class PayrollService {
 
     private final PayrollRepository payrollRepository;
+    private final UserRepository userRepository;
 
-    public PayrollService(PayrollRepository payrollRepository) {
+    public PayrollService(
+            PayrollRepository payrollRepository,
+            UserRepository userRepository) {
+
         this.payrollRepository = payrollRepository;
+        this.userRepository = userRepository;
     }
 
     // CREATE
@@ -106,5 +115,26 @@ public class PayrollService {
                         employeeId,
                         paymentDate
                 );
+    }
+
+    // GET LOGGED-IN EMPLOYEE'S PAYROLL
+    public List<Payroll> getMyPayrolls() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found"
+                        ));
+
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+        return payrollRepository
+                .findByEmployeeEmployeeId(employeeId);
     }
 }

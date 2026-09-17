@@ -2,8 +2,12 @@ package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Task;
+import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.TaskRepository;
+import com.mallika.EmployeeManagementSystem.repository.UserRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,11 +17,14 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(
+            TaskRepository taskRepository,
+            UserRepository userRepository) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
     }
-
     // CREATE
     public Task createTask(Task task) {
         return taskRepository.save(task);
@@ -151,5 +158,30 @@ public class TaskService {
                 : Sort.by(field).ascending();
 
         return taskRepository.findAll(sort);
+    }
+
+    // GET TASKS ASSIGNED TO LOGGED-IN EMPLOYEE
+    public List<Task> getMyTasks() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        if (user.getEmployee() == null) {
+            throw new ResourceNotFoundException(
+                    "Employee not found"
+            );
+        }
+
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+        return taskRepository
+                .findByAssignedToEmployeeId(employeeId);
     }
 }
