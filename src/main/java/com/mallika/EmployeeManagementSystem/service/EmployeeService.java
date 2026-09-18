@@ -52,6 +52,12 @@ public class EmployeeService {
                                 "User not found: " + username
                         ));
 
+        if (user.getEmployee() == null) {
+            throw new ResourceNotFoundException(
+                    "No employee profile linked to user: " + username
+            );
+        }
+
         return user.getEmployee();
     }
 
