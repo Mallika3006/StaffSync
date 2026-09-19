@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Attendance - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    ```
+    <h1>My Attendance</h1>
+
+    <div class="card" id="attendance">
+        <p class="loading">Loading attendance...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+    ```
+
+</div>
+
+<script>
+
+    fetch('/attendance/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load attendance");
+            }
+
+            return response.json();
+        })
+
+        .then(attendanceList => {
+
+            const attendanceDiv =
+                document.getElementById("attendance");
+
+            if (attendanceList.length === 0) {
+
+                attendanceDiv.innerHTML =
+                    "<p class='empty-message'>No attendance records found.</p>";
+
+                return;
+            }
+
+            let html = `
+                <table>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                    </tr>
+            `;
+
+            attendanceList.forEach(attendance => {
+
+                html += `
+                    <tr>
+                        <td>${attendance.attDate}</td>
+                        <td>${attendance.status}</td>
+                        <td>${attendance.checkIn ?? "-"}</td>
+                        <td>${attendance.checkOut ?? "-"}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            attendanceDiv.innerHTML = html;
+        })
+
+        .catch(error => {
+
+            document.getElementById("attendance").innerHTML =
+                "<p class='error-message'>Unable to load attendance.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>

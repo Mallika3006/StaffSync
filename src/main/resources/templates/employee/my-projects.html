@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Projects - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    ```
+    <h1>My Projects</h1>
+
+    <div class="card" id="projects">
+        <p class="loading">Loading projects...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+    ```
+
+</div>
+
+<script>
+
+    fetch('/projects/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load projects");
+            }
+
+            return response.json();
+        })
+
+        .then(projectList => {
+
+            const projectsDiv =
+                document.getElementById("projects");
+
+            if (projectList.length === 0) {
+
+                projectsDiv.innerHTML =
+                    "<p class='empty-message'>No projects found.</p>";
+
+                return;
+            }
+
+            let html = `
+                <table>
+
+                    <tr>
+                        <th>Project ID</th>
+                        <th>Project Name</th>
+                        <th>Description</th>
+                    </tr>
+            `;
+
+            projectList.forEach(project => {
+
+                html += `
+                    <tr>
+                        <td>${project.projectId}</td>
+                        <td>${project.projectName}</td>
+                        <td>${project.description}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            projectsDiv.innerHTML = html;
+        })
+
+        .catch(error => {
+
+            document.getElementById("projects").innerHTML =
+                "<p class='error-message'>Unable to load projects.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Leaves - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    ```
+    <h1>My Leaves</h1>
+
+    <div class="card" id="leaves">
+        <p class="loading">Loading leaves...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+    ```
+
+</div>
+
+<script>
+
+    fetch('/leaves/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load leaves");
+            }
+
+            return response.json();
+        })
+
+        .then(leaveList => {
+
+            const leavesDiv =
+                document.getElementById("leaves");
+
+            if (leaveList.length === 0) {
+
+                leavesDiv.innerHTML =
+                    "<p class='empty-message'>No leave records found.</p>";
+
+                return;
+            }
+
+            let html = `
+                <table>
+
+                    <tr>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+            `;
+
+            leaveList.forEach(leave => {
+
+                html += `
+                    <tr>
+                        <td>${leave.fromDate}</td>
+                        <td>${leave.toDate}</td>
+                        <td>${leave.reason}</td>
+                        <td>${leave.status}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            leavesDiv.innerHTML = html;
+        })
+
+        .catch(error => {
+
+            document.getElementById("leaves").innerHTML =
+                "<p class='error-message'>Unable to load leaves.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>

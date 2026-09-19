@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>Employee Dashboard</title>
+</head>
+
+<body>
+
+<h1>Employee Dashboard</h1>
+
+<p>
+    Welcome, <span sec:authentication="name"></span>
+</p>
+
+<h3>My Features</h3>
+
+<ul>
+    <li><a href="/my-profile">My Profile</a></li>
+    <li><a href="/my-attendance">My Attendance</a></li>
+    <li><a href="/my-leaves">My Leaves</a></li>
+    <li><a href="/my-payroll">My Payroll</a></li>
+    <li><a href="/my-projects">My Projects</a></li>
+    <li><a href="/my-tasks">My Tasks</a></li>
+    <li><a href="/my-team">My Team</a></li>
+    <li><a href="/my-department">My Department</a></li>
+</ul>
+
+</body>
+</html>

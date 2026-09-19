@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>HR Dashboard</title>
+</head>
+
+<body>
+
+<h1>HR Dashboard</h1>
+
+<p>
+    Welcome, <span sec:authentication="name"></span>
+</p>
+
+<h3>HR Features</h3>
+
+<ul>
+    <li><a href="/employees">Manage Employees</a></li>
+    <li><a href="/departments">Manage Departments</a></li>
+    <li><a href="/designations">Manage Designations</a></li>
+    <li><a href="/attendance">Manage Attendance</a></li>
+    <li><a href="/payrolls">Manage Payroll</a></li>
+    <li><a href="/teams">Manage Teams</a></li>
+    <li><a href="/projects">Manage Projects</a></li>
+    <li><a href="/tasks">Manage Tasks</a></li>
+    <li><a href="/leaves">Manage Leaves</a></li>
+</ul>
+
+<hr>
+
+<h3>Employee Dashboard</h3>
+
+<a href="/employee-dashboard">
+    Go to Employee Dashboard
+</a>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.mallika.EmployeeManagementSystem.controller;
 
+import com.mallika.EmployeeManagementSystem.dto.EmployeeResponseDTO;
 import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.service.EmployeeService;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class EmployeeController {
 
     // GET LOGGED-IN EMPLOYEE
     @GetMapping("/me")
-    public ResponseEntity<Employee> getMyProfile(
+    public ResponseEntity<EmployeeResponseDTO> getMyProfile(
             Authentication authentication) {
 
         String username = authentication.getName();
@@ -52,7 +53,34 @@ public class EmployeeController {
         Employee employee =
                 employeeService.getMyProfile(username);
 
-        return ResponseEntity.ok(employee);
+        EmployeeResponseDTO dto = new EmployeeResponseDTO();
+
+        dto.setEmployeeId(employee.getEmployeeId().longValue());
+        dto.setFirstName(employee.getFirstName());
+        dto.setLastName(employee.getLastName());
+        dto.setEmail(employee.getEmail());
+        dto.setPhone(employee.getPhone());
+        dto.setDateOfBirth(employee.getDateOfBirth());
+        dto.setHireDate(employee.getHireDate());
+        dto.setAddress(employee.getAddress());
+
+        if (employee.getDesignation() != null) {
+            dto.setDesignationId(
+                    employee.getDesignation()
+                            .getDesignationId()
+                            .longValue()
+            );
+        }
+
+        if (employee.getTeam() != null) {
+            dto.setTeamId(
+                    employee.getTeam()
+                            .getTeamId()
+                            .longValue()
+            );
+        }
+
+        return ResponseEntity.ok(dto);
     }
 
     // GET BY ID

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Tasks - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    ```
+    <h1>My Tasks</h1>
+
+    <div class="card" id="tasks">
+        <p class="loading">Loading tasks...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+    ```
+
+</div>
+
+<script>
+
+    fetch('/tasks/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load tasks");
+            }
+
+            return response.json();
+        })
+
+        .then(taskList => {
+
+            const tasksDiv =
+                document.getElementById("tasks");
+
+            if (taskList.length === 0) {
+
+                tasksDiv.innerHTML =
+                    "<p class='empty-message'>No tasks found.</p>";
+
+                return;
+            }
+
+            let html = `
+                <table>
+
+                    <tr>
+                        <th>Task ID</th>
+                        <th>Task Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                    </tr>
+            `;
+
+            taskList.forEach(task => {
+
+                html += `
+                    <tr>
+                        <td>${task.taskId}</td>
+                        <td>${task.taskName}</td>
+                        <td>${task.description}</td>
+                        <td>${task.status}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            tasksDiv.innerHTML = html;
+        })
+
+        .catch(error => {
+
+            document.getElementById("tasks").innerHTML =
+                "<p class='error-message'>Unable to load tasks.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>

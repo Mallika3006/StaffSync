@@ -7,7 +7,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,48 +27,72 @@ public class SecurityConfig {
             CustomUserDetailsService userDetailsService) throws Exception {
 
         http
-                // Disable CSRF for REST API/Postman testing
-                .csrf(csrf -> csrf.disable())
 
-                // JWT is stateless
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS))
+                // CSRF disabled for now
+                .csrf(csrf -> csrf.disable())
 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
 
+                        // LOGIN PAGES
+                        .requestMatchers(
+                                "/admin-login",
+                                "/employee-login",
+                                "/perform-login",
+                                "/login"
+                        ).permitAll()
+
                         // First user creation
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users")
+                        .permitAll()
+
+                        // DASHBOARDS
+                        // Only ADMIN
+                        .requestMatchers("/admin-dashboard")
+                        .hasRole("ADMIN")
+
+                        // Only HR
+                        .requestMatchers("/hr-dashboard")
+                        .hasRole("HR")
+
+                        // Only MANAGER
+                        .requestMatchers("/manager-dashboard")
+                        .hasRole("MANAGER")
+
+                        // EMPLOYEE + HR + MANAGER
+                        .requestMatchers("/employee-dashboard")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         // ADMIN
                         .requestMatchers("/users/**")
                         .hasRole("ADMIN")
 
-                        // EMPLOYEE → own data
+                        // EMPLOYEE DASHBOARD
+                        // Own data
+                        // EMPLOYEE + HR + MANAGER
                         .requestMatchers("/employees/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/attendance/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/leaves/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/payrolls/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/projects/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/tasks/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/teams/me/members")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/departments/me")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         // ADMIN + HR
                         .requestMatchers("/employees/**")
@@ -98,14 +121,50 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "HR", "MANAGER")
 
                         .requestMatchers("/leaves/**")
-                        .hasAnyRole("ADMIN", "HR","MANAGER")
+                        .hasAnyRole("ADMIN", "HR", "MANAGER")
 
-
-                        // Everything else requires authentication
+                        // EVERYTHING ELSE
                         .anyRequest().authenticated()
                 )
 
-                // Run JWT filter before Spring's username/password filter
+                // FORM LOGIN
+                .formLogin(form -> form
+
+                        .loginPage("/admin-login")
+
+                        .loginProcessingUrl("/perform-login")
+
+                        .successHandler((request, response, authentication) -> {
+
+                            String role = authentication.getAuthorities()
+                                    .iterator()
+                                    .next()
+                                    .getAuthority();
+
+                            if (role.equals("ROLE_ADMIN")) {
+
+                                response.sendRedirect("/admin-dashboard");
+
+                            } else if (role.equals("ROLE_HR")) {
+
+                                response.sendRedirect("/hr-dashboard");
+
+                            } else if (role.equals("ROLE_MANAGER")) {
+
+                                response.sendRedirect("/manager-dashboard");
+
+                            } else {
+
+                                response.sendRedirect("/employee-dashboard");
+                            }
+                        })
+
+                        .failureUrl("/admin-login?error=true")
+
+                        .permitAll()
+                )
+
+                // JWT FILTER
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -114,14 +173,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // PASSWORD ENCODER
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
 
+    // AUTHENTICATION MANAGER
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
+            AuthenticationConfiguration configuration)
+            throws Exception {
 
         return configuration.getAuthenticationManager();
     }

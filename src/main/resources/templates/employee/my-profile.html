@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Profile - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    ```
+    <h1>My Profile</h1>
+
+    <div class="card" id="profile">
+        <p class="loading">Loading profile...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+    ```
+
+</div>
+
+<script>
+
+    fetch('/employees/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load profile");
+            }
+
+            return response.json();
+        })
+
+        .then(employee => {
+
+            document.getElementById("profile").innerHTML = `
+
+                <div class="profile-row">
+                    <span class="profile-label">Employee ID</span>
+                    <span>${employee.employeeId}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">First Name</span>
+                    <span>${employee.firstName}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Last Name</span>
+                    <span>${employee.lastName}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Email</span>
+                    <span>${employee.email}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Phone</span>
+                    <span>${employee.phone}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Date of Birth</span>
+                    <span>${employee.dateOfBirth}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Hire Date</span>
+                    <span>${employee.hireDate}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Address</span>
+                    <span>${employee.address}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Designation ID</span>
+                    <span>${employee.designationId ?? "Not assigned"}</span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">Team ID</span>
+                    <span>${employee.teamId ?? "Not assigned"}</span>
+                </div>
+            `;
+        })
+
+        .catch(error => {
+
+            document.getElementById("profile").innerHTML =
+                "<p class='error-message'>Unable to load profile.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Payroll - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    ```
+    <h1>My Payroll</h1>
+
+    <div class="card" id="payroll">
+        <p class="loading">Loading payroll...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+    ```
+
+</div>
+
+<script>
+
+    fetch('/payrolls/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load payroll");
+            }
+
+            return response.json();
+        })
+
+        .then(payrollList => {
+
+            const payrollDiv =
+                document.getElementById("payroll");
+
+            if (payrollList.length === 0) {
+
+                payrollDiv.innerHTML =
+                    "<p class='empty-message'>No payroll records found.</p>";
+
+                return;
+            }
+
+            let html = `
+                <table>
+
+                    <tr>
+                        <th>Pay Month</th>
+                        <th>Basic</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Salary</th>
+                        <th>Payment Date</th>
+                    </tr>
+            `;
+
+            payrollList.forEach(payroll => {
+
+                html += `
+                    <tr>
+                        <td>${payroll.payMonth}</td>
+                        <td>${payroll.basic}</td>
+                        <td>${payroll.allowances}</td>
+                        <td>${payroll.deductions}</td>
+                        <td>${payroll.net}</td>
+                        <td>${payroll.paymentDate ?? "-"}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            payrollDiv.innerHTML = html;
+        })
+
+        .catch(error => {
+
+            document.getElementById("payroll").innerHTML =
+                "<p class='error-message'>Unable to load payroll.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>
