@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .permitAll()
 
                         // DASHBOARDS
+
                         // Only ADMIN
                         .requestMatchers("/admin-dashboard")
                         .hasRole("ADMIN")
@@ -67,10 +68,16 @@ public class SecurityConfig {
                         .requestMatchers("/users/**")
                         .hasRole("ADMIN")
 
-                        // EMPLOYEE DASHBOARD
-                        // Own data
+                        // ==========================================
+                        // EMPLOYEE DASHBOARD - OWN DATA
                         // EMPLOYEE + HR + MANAGER
+                        // ==========================================
+
                         .requestMatchers("/employees/me")
+                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+
+                        // Profile photo upload
+                        .requestMatchers("/employees/me/photo")
                         .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
                         .requestMatchers("/attendance/me")
@@ -94,7 +101,10 @@ public class SecurityConfig {
                         .requestMatchers("/departments/me")
                         .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
 
+                        // ==========================================
                         // ADMIN + HR
+                        // ==========================================
+
                         .requestMatchers("/employees/**")
                         .hasAnyRole("ADMIN", "HR")
 
@@ -110,7 +120,10 @@ public class SecurityConfig {
                         .requestMatchers("/payrolls/**")
                         .hasAnyRole("ADMIN", "HR")
 
+                        // ==========================================
                         // ADMIN + HR + MANAGER
+                        // ==========================================
+
                         .requestMatchers("/teams/**")
                         .hasAnyRole("ADMIN", "HR", "MANAGER")
 

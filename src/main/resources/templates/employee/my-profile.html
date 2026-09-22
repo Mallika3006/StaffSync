@@ -1,27 +1,34 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <title>My Profile - StaffSync</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 
 <body>
 
 <div class="container">
 
-    ```
     <h1>My Profile</h1>
 
     <div class="card" id="profile">
+
         <p class="loading">Loading profile...</p>
+
     </div>
+
+    <br>
+
+    <a class="btn" href="/employee-profile/edit">
+        Edit Profile
+    </a>
+
+    <br><br>
 
     <a class="back-link" href="/employee-dashboard">
         ← Back to Dashboard
     </a>
-    ```
 
 </div>
 
@@ -39,7 +46,17 @@
 
         .then(employee => {
 
+            const photoHtml = employee.profilePhoto
+                ? `<img src="${employee.profilePhoto}"
+                         alt="Profile Photo"
+                         class="profile-photo">`
+                : `<p>No profile photo uploaded.</p>`;
+
             document.getElementById("profile").innerHTML = `
+
+                <div class="profile-photo-container">
+                    ${photoHtml}
+                </div>
 
                 <div class="profile-row">
                     <span class="profile-label">Employee ID</span>
@@ -90,7 +107,9 @@
                     <span class="profile-label">Team ID</span>
                     <span>${employee.teamId ?? "Not assigned"}</span>
                 </div>
+
             `;
+
         })
 
         .catch(error => {
@@ -99,6 +118,7 @@
                 "<p class='error-message'>Unable to load profile.</p>";
 
             console.error(error);
+
         });
 
 </script>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Edit Profile - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Edit Profile</h1>
+
+    <div class="card">
+
+        <form id="editProfileForm" enctype="multipart/form-data">
+
+            <label>First Name</label>
+            <input type="text" id="firstName" required>
+
+            <label>Last Name</label>
+            <input type="text" id="lastName" required>
+
+            <label>Email</label>
+            <input type="email" id="email" required>
+
+            <label>Phone</label>
+            <input type="text" id="phone">
+
+            <label>Date of Birth</label>
+            <input type="date" id="dateOfBirth">
+
+            <label>Address</label>
+            <input type="text" id="address">
+
+            <label>Profile Photo</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
+
+            <button type="submit" class="btn">
+                Save Changes
+            </button>
+
+        </form>
+
+        <script>
+
+            const token = localStorage.getItem("token");
+
+            // Load existing profile
+            fetch('/employees/me', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+                .then(response => {
+
+                    if (!response.ok) {
+                        throw new Error("Failed to load profile");
+                    }
+
+                    return response.json();
+                })
+
+                .then(employee => {
+
+                    document.getElementById("firstName").value =
+                        employee.firstName || "";
+
+                    document.getElementById("lastName").value =
+                        employee.lastName || "";
+
+                    document.getElementById("email").value =
+                        employee.email || "";
+
+                    document.getElementById("phone").value =
+                        employee.phone || "";
+
+                    document.getElementById("dateOfBirth").value =
+                        employee.dateOfBirth || "";
+
+                    document.getElementById("address").value =
+                        employee.address || "";
+                })
+
+                .catch(error => {
+
+                    console.error(error);
+                    alert("Unable to load profile.");
+                });
+
+
+            // Submit form
+            document.getElementById("editProfileForm")
+                .addEventListener("submit", async function(event) {
+
+                    event.preventDefault();
+
+                    try {
+
+                        // 1. Update profile details
+
+                        const updatedProfile = {
+                            firstName: document.getElementById("firstName").value,
+                            lastName: document.getElementById("lastName").value,
+                            email: document.getElementById("email").value,
+                            phone: document.getElementById("phone").value,
+                            dateOfBirth: document.getElementById("dateOfBirth").value,
+                            address: document.getElementById("address").value
+                        };
+
+                        const profileResponse = await fetch('/employees/me', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify(updatedProfile)
+                        });
+
+                        if (!profileResponse.ok) {
+                            throw new Error("Failed to update profile");
+                        }
+
+
+                        // 2. Upload profile photo
+
+                        const photo = document.getElementById("photo").files[0];
+
+                        if (photo) {
+
+                            const formData = new FormData();
+
+                            formData.append("photo", photo);
+
+                            const photoResponse = await fetch('/employees/me/photo', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                body: formData
+                            });
+
+                            if (!photoResponse.ok) {
+                                throw new Error("Failed to upload profile photo");
+                            }
+                        }
+
+
+                        alert("Profile updated successfully!");
+
+                        window.location.href = "/my-profile";
+
+                    } catch (error) {
+
+                        console.error(error);
+                        alert(error.message);
+                    }
+
+                });
+
+        </script>
+    </div>
+
+    <a class="back-link" href="/my-profile">
+        ← Back to Profile
+    </a>
+
+</div>
+
+</body>
+</html>

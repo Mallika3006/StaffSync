@@ -34,6 +34,8 @@ public class Employee {
 
     private String address;
 
+    private String profilePhoto;
+
     @ManyToOne
     @JoinColumn(name = "designation_id")
     private Designation designation;

@@ -1,14 +1,20 @@
 package com.mallika.EmployeeManagementSystem.service;
 
+import com.mallika.EmployeeManagementSystem.dto.EmployeeUpdateDTO;
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.EmployeeRepository;
 import com.mallika.EmployeeManagementSystem.repository.UserRepository;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EmployeeService {
@@ -24,26 +30,50 @@ public class EmployeeService {
         this.userRepository = userRepository;
     }
 
+
+    // =========================
     // CREATE
+    // =========================
+
     public Employee createEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+
+        // Keep temporarily.
+        // We will convert this to CallableStatement next.
+
+        throw new UnsupportedOperationException(
+                "Create employee will be converted to stored procedure"
+        );
     }
 
+
+    // =========================
     // GET ALL
+    // =========================
+
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+
+        return employeeRepository.getAllEmployees();
     }
 
+
+    // =========================
     // GET BY ID
+    // =========================
+
     public Employee getEmployeeById(Integer id) {
-        return employeeRepository.findById(id)
+
+        return employeeRepository.getEmployeeById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Employee not found with id: " + id
                         ));
     }
 
+
+    // =========================
     // GET LOGGED-IN EMPLOYEE
+    // =========================
+
     public Employee getMyProfile(String username) {
 
         User user = userRepository.findByUsername(username)
@@ -53,94 +83,199 @@ public class EmployeeService {
                         ));
 
         if (user.getEmployee() == null) {
+
             throw new ResourceNotFoundException(
-                    "No employee profile linked to user: " + username
+                    "No employee profile linked to user: "
+                            + username
             );
         }
 
         return user.getEmployee();
     }
 
+
+    // =========================
     // UPDATE
-    public Employee updateEmployee(Integer id, Employee employeeDetails) {
+    // =========================
 
-        Employee employee = getEmployeeById(id);
+    public Employee updateEmployee(
+            Integer id,
+            Employee employeeDetails) {
 
-        employee.setFirstName(employeeDetails.getFirstName());
-        employee.setLastName(employeeDetails.getLastName());
-        employee.setEmail(employeeDetails.getEmail());
-        employee.setPhone(employeeDetails.getPhone());
-        employee.setDateOfBirth(employeeDetails.getDateOfBirth());
-        employee.setHireDate(employeeDetails.getHireDate());
-        employee.setAddress(employeeDetails.getAddress());
-        employee.setDesignation(employeeDetails.getDesignation());
-        employee.setTeam(employeeDetails.getTeam());
+        // Keep temporarily.
+        // We will convert this to CallableStatement next.
 
-        return employeeRepository.save(employee);
+        throw new UnsupportedOperationException(
+                "Update employee will be converted to stored procedure"
+        );
     }
 
+
+    // =========================
     // DELETE
+    // =========================
+
     public void deleteEmployee(Integer id) {
 
-        Employee employee = getEmployeeById(id);
+        // Keep temporarily.
+        // We will convert this to CallableStatement next.
 
-        employeeRepository.delete(employee);
+        throw new UnsupportedOperationException(
+                "Delete employee will be converted to stored procedure"
+        );
     }
 
+
+    // =========================
     // SEARCH BY FIRST NAME
-    public List<Employee> searchByFirstName(String firstName) {
-        return employeeRepository
-                .findByFirstNameContainingIgnoreCase(firstName);
+    // =========================
+
+    public List<Employee> searchByFirstName(
+            String firstName) {
+
+        return employeeRepository.searchByName(firstName);
     }
 
+
+    // =========================
     // SEARCH BY LAST NAME
-    public List<Employee> searchByLastName(String lastName) {
-        return employeeRepository
-                .findByLastNameContainingIgnoreCase(lastName);
+    // =========================
+
+    public List<Employee> searchByLastName(
+            String lastName) {
+
+        return employeeRepository.searchByName(lastName);
     }
 
+
+    // =========================
     // SEARCH BY NAME
+    // =========================
+
     public List<Employee> searchByName(String name) {
-        return employeeRepository
-                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
-                        name, name
-                );
+
+        return employeeRepository.searchByName(name);
     }
 
+
+    // =========================
     // SEARCH BY EMAIL
+    // =========================
+
     public Employee getEmployeeByEmail(String email) {
-        return employeeRepository.findByEmail(email)
+
+        return employeeRepository
+                .getEmployeeByEmail(email)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Employee not found with email: " + email
+                                "Employee not found with email: "
+                                        + email
                         ));
     }
 
+
+    // =========================
     // FILTER BY DESIGNATION
-    public List<Employee> getEmployeesByDesignation(Integer designationId) {
+    // =========================
+
+    public List<Employee> getEmployeesByDesignation(
+            Integer designationId) {
+
         return employeeRepository
-                .findByDesignationDesignationId(designationId);
+                .getEmployeesByDesignation(designationId);
     }
 
+
+    // =========================
     // FILTER BY TEAM
-    public List<Employee> getEmployeesByTeam(Integer teamId) {
+    // =========================
+
+    public List<Employee> getEmployeesByTeam(
+            Integer teamId) {
+
         return employeeRepository
-                .findByTeamTeamId(teamId);
+                .getEmployeesByTeam(teamId);
     }
 
+
+    // =========================
     // SORT
+    // =========================
+
     public List<Employee> getEmployeesSorted(
             String field,
             String direction) {
 
-        Sort sort;
+        // Sorting will also be converted to SQL.
+        throw new UnsupportedOperationException(
+                "Sorting will be converted to SQL"
+        );
+    }
 
-        if (direction.equalsIgnoreCase("desc")) {
-            sort = Sort.by(field).descending();
-        } else {
-            sort = Sort.by(field).ascending();
+
+// =========================
+// UPDATE MY PROFILE
+// =========================
+
+    public Employee updateMyProfile(
+            String username,
+            EmployeeUpdateDTO updateDetails) {
+
+        Employee employee = getMyProfile(username);
+
+        return employeeRepository.updateMyProfile(
+                employee.getEmployeeId(),
+                updateDetails
+        );
+    }
+
+
+    // =========================
+// PROFILE PHOTO
+// =========================
+
+    public Employee updateProfilePhoto(
+            String username,
+            MultipartFile photo) {
+
+        Employee employee = getMyProfile(username);
+
+        try {
+
+            String uploadDir =
+                    "uploads/profile-photos/";
+
+            Files.createDirectories(
+                    Paths.get(uploadDir)
+            );
+
+            String fileName =
+                    UUID.randomUUID()
+                            + "_"
+                            + photo.getOriginalFilename();
+
+            Path filePath =
+                    Paths.get(uploadDir + fileName);
+
+            Files.write(
+                    filePath,
+                    photo.getBytes()
+            );
+
+            String profilePhoto =
+                    "/uploads/profile-photos/" + fileName;
+
+            return employeeRepository.updateProfilePhoto(
+                    employee.getEmployeeId(),
+                    profilePhoto
+            );
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Failed to upload profile photo",
+                    e
+            );
         }
-
-        return employeeRepository.findAll(sort);
     }
 }

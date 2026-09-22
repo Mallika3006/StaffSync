@@ -1,13 +1,13 @@
 package com.mallika.EmployeeManagementSystem.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Data
-public class EmployeeResponseDTO {
-
-    private Long employeeId;
+@Getter
+@Setter
+public class EmployeeUpdateDTO {
 
     private String firstName;
 
@@ -19,13 +19,8 @@ public class EmployeeResponseDTO {
 
     private LocalDate dateOfBirth;
 
-    private LocalDate hireDate;
-
     private String address;
-
-    private Long designationId;
-
-    private Long teamId;
 
     private String profilePhoto;
 }
+

@@ -1,12 +1,15 @@
 package com.mallika.EmployeeManagementSystem.controller;
 
 import com.mallika.EmployeeManagementSystem.dto.EmployeeResponseDTO;
+import com.mallika.EmployeeManagementSystem.dto.EmployeeUpdateDTO;
 import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.service.EmployeeService;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -63,6 +66,7 @@ public class EmployeeController {
         dto.setDateOfBirth(employee.getDateOfBirth());
         dto.setHireDate(employee.getHireDate());
         dto.setAddress(employee.getAddress());
+        dto.setProfilePhoto(employee.getProfilePhoto());
 
         if (employee.getDesignation() != null) {
             dto.setDesignationId(
@@ -91,6 +95,98 @@ public class EmployeeController {
         return ResponseEntity.ok(
                 employeeService.getEmployeeById(id)
         );
+    }
+
+    // UPDATE LOGGED-IN EMPLOYEE
+    @PutMapping("/me")
+    public ResponseEntity<EmployeeResponseDTO> updateMyProfile(
+            Authentication authentication,
+            @RequestBody EmployeeUpdateDTO updateDetails) {
+
+        String username = authentication.getName();
+
+        Employee employee =
+                employeeService.updateMyProfile(
+                        username,
+                        updateDetails
+                );
+
+        EmployeeResponseDTO dto = new EmployeeResponseDTO();
+
+        dto.setEmployeeId(employee.getEmployeeId().longValue());
+        dto.setFirstName(employee.getFirstName());
+        dto.setLastName(employee.getLastName());
+        dto.setEmail(employee.getEmail());
+        dto.setPhone(employee.getPhone());
+        dto.setDateOfBirth(employee.getDateOfBirth());
+        dto.setHireDate(employee.getHireDate());
+        dto.setAddress(employee.getAddress());
+        dto.setProfilePhoto(employee.getProfilePhoto());
+
+        if (employee.getDesignation() != null) {
+            dto.setDesignationId(
+                    employee.getDesignation()
+                            .getDesignationId()
+                            .longValue()
+            );
+        }
+
+        if (employee.getTeam() != null) {
+            dto.setTeamId(
+                    employee.getTeam()
+                            .getTeamId()
+                            .longValue()
+            );
+        }
+
+        return ResponseEntity.ok(dto);
+    }
+
+    // UPLOAD PROFILE PHOTO
+    @PostMapping("/me/photo")
+    public ResponseEntity<EmployeeResponseDTO> uploadProfilePhoto(
+            Authentication authentication,
+            @RequestParam("photo") MultipartFile photo) {
+
+        System.out.println("PHOTO ENDPOINT CALLED");
+
+        String username = authentication.getName();
+
+        Employee employee =
+                employeeService.updateProfilePhoto(
+                        username,
+                        photo
+                );
+
+        EmployeeResponseDTO dto = new EmployeeResponseDTO();
+
+        dto.setEmployeeId(employee.getEmployeeId().longValue());
+        dto.setFirstName(employee.getFirstName());
+        dto.setLastName(employee.getLastName());
+        dto.setEmail(employee.getEmail());
+        dto.setPhone(employee.getPhone());
+        dto.setDateOfBirth(employee.getDateOfBirth());
+        dto.setHireDate(employee.getHireDate());
+        dto.setAddress(employee.getAddress());
+        dto.setProfilePhoto(employee.getProfilePhoto());
+
+        if (employee.getDesignation() != null) {
+            dto.setDesignationId(
+                    employee.getDesignation()
+                            .getDesignationId()
+                            .longValue()
+            );
+        }
+
+        if (employee.getTeam() != null) {
+            dto.setTeamId(
+                    employee.getTeam()
+                            .getTeamId()
+                            .longValue()
+            );
+        }
+
+        return ResponseEntity.ok(dto);
     }
 
     // UPDATE
@@ -161,6 +257,8 @@ public class EmployeeController {
     public ResponseEntity<List<Employee>> getEmployeesSorted(
             @RequestParam(defaultValue = "firstName") String field,
             @RequestParam(defaultValue = "asc") String direction) {
+
+        Sort sort;
 
         return ResponseEntity.ok(
                 employeeService.getEmployeesSorted(field, direction)

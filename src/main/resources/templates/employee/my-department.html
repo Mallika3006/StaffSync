@@ -1,55 +1,95 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>My Department</title>
+    <title>My Department - StaffSync</title>
+
+    <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 
 <body>
 
-<h1>My Department</h1>
+<div class="container">
 
-<div id="department">
-    Loading department...
+    <h1>My Department</h1>
+
+    <div class="card" id="department">
+        <p class="loading">Loading department...</p>
+    </div>
+
+    <a class="back-link" href="/employee-dashboard">
+        ← Back to Dashboard
+    </a>
+
 </div>
 
-<br>
-
-<a href="/employee-dashboard">Back to Dashboard</a>
-
 <script>
+
     fetch('/departments/me')
         .then(response => {
+
             if (!response.ok) {
                 throw new Error("Failed to load department");
             }
+
             return response.json();
         })
+
         .then(department => {
 
             const departmentDiv =
                 document.getElementById("department");
 
             departmentDiv.innerHTML = `
-                <p><strong>Department ID:</strong>
-                    ${department.departmentId}</p>
 
-                <p><strong>Name:</strong>
-                    ${department.name}</p>
+                <div class="profile-row">
+                    <span class="profile-label">
+                        Department ID
+                    </span>
+                    <span>
+                        ${department.departmentId}
+                    </span>
+                </div>
 
-                <p><strong>Location:</strong>
-                    ${department.location}</p>
+                <div class="profile-row">
+                    <span class="profile-label">
+                        Name
+                    </span>
+                    <span>
+                        ${department.name}
+                    </span>
+                </div>
 
-                <p><strong>Description:</strong>
-                    ${department.description}</p>
+                <div class="profile-row">
+                    <span class="profile-label">
+                        Location
+                    </span>
+                    <span>
+                        ${department.location}
+                    </span>
+                </div>
+
+                <div class="profile-row">
+                    <span class="profile-label">
+                        Description
+                    </span>
+                    <span>
+                        ${department.description}
+                    </span>
+                </div>
+
             `;
         })
+
         .catch(error => {
+
             document.getElementById("department").innerHTML =
-                "<p>Unable to load department.</p>";
+                "<p class='error-message'>Unable to load department.</p>";
+
             console.error(error);
+
         });
+
 </script>
 
 </body>

@@ -1,5 +1,8 @@
 package com.mallika.EmployeeManagementSystem.controller;
 
+import ch.qos.logback.core.model.Model;
+import com.mallika.EmployeeManagementSystem.model.Employee;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -75,4 +78,10 @@ public class PageController {
     public String myDepartment() {
         return "employee/my-department";
     }
+
+    @GetMapping("/employee-profile/edit")
+    public String editEmployeeProfile() {
+        return "employee/employee-profile-edit";
+    }
+
 }
