@@ -23,19 +23,21 @@ public class TeamService {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
     }
+
     // CREATE
     public Team createTeam(Team team) {
-        return teamRepository.save(team);
+        return teamRepository.createTeam(team);
     }
 
     // GET ALL
     public List<Team> getAllTeams() {
-        return teamRepository.findAll();
+        return teamRepository.getAllTeams();
     }
 
     // GET BY ID
     public Team getTeamById(Integer id) {
-        return teamRepository.findById(id)
+
+        return teamRepository.getTeamById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Team not found with id: " + id
@@ -43,64 +45,99 @@ public class TeamService {
     }
 
     // UPDATE
-    public Team updateTeam(Integer id, Team teamDetails) {
+    public Team updateTeam(
+            Integer id,
+            Team teamDetails) {
 
-        Team team = getTeamById(id);
+        getTeamById(id);
 
-        team.setTeamName(teamDetails.getTeamName());
-        team.setDescription(teamDetails.getDescription());
-        team.setDepartment(teamDetails.getDepartment());
-        team.setProjects(teamDetails.getProjects());
+        Team updated =
+                teamRepository.updateTeam(
+                        id,
+                        teamDetails
+                );
 
-        return teamRepository.save(team);
+        if (updated == null) {
+            throw new ResourceNotFoundException(
+                    "Team not found with id: " + id
+            );
+        }
+
+        return updated;
     }
 
     // DELETE
     public void deleteTeam(Integer id) {
 
-        Team team = getTeamById(id);
+        getTeamById(id);
 
-        teamRepository.delete(team);
+        boolean deleted =
+                teamRepository.deleteTeam(id);
+
+        if (!deleted) {
+            throw new ResourceNotFoundException(
+                    "Team not found with id: " + id
+            );
+        }
     }
 
     // SEARCH BY TEAM NAME
-    public List<Team> searchByTeamName(String teamName) {
+    public List<Team> searchByTeamName(
+            String teamName) {
+
         return teamRepository
-                .findByTeamNameContainingIgnoreCase(teamName);
+                .findByTeamNameContainingIgnoreCase(
+                        teamName
+                );
     }
 
     // GET BY EXACT TEAM NAME
-    public Team getTeamByName(String teamName) {
+    public Team getTeamByName(
+            String teamName) {
 
         return teamRepository
                 .findByTeamNameIgnoreCase(teamName)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Team not found with name: " + teamName
+                                "Team not found with name: "
+                                        + teamName
                         ));
     }
 
     // GET TEAMS BY DEPARTMENT
-    public List<Team> getTeamsByDepartment(Integer departmentId) {
+    public List<Team> getTeamsByDepartment(
+            Integer departmentId) {
+
         return teamRepository
-                .findByDepartmentDepartmentId(departmentId);
+                .findByDepartmentDepartmentId(
+                        departmentId
+                );
     }
 
-    public Team getTeamByEmployeeId(Integer employeeId) {
-        return teamRepository.findByEmployeesEmployeeId(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Team not found for employee id: " + employeeId
-                ));
+    // GET TEAM BY EMPLOYEE
+    public Team getTeamByEmployeeId(
+            Integer employeeId) {
+
+        return teamRepository
+                .findByEmployeesEmployeeId(employeeId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Team not found for employee id: "
+                                        + employeeId
+                        ));
     }
 
     // GET MY TEAM MEMBERS
-    public List<Employee> getMyTeamMembers(String username) {
+    public List<Employee> getMyTeamMembers(
+            String username) {
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found: " + username
-                        ));
+        User user =
+                userRepository.findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found: "
+                                                + username
+                                ));
 
         if (user.getEmployee() == null) {
             throw new ResourceNotFoundException(
@@ -108,10 +145,12 @@ public class TeamService {
             );
         }
 
-        Integer employeeId = user.getEmployee().getEmployeeId();
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
 
-        Team team = getTeamByEmployeeId(employeeId);
-
-        return team.getEmployees();
+        return teamRepository
+                .getTeamMembersByEmployeeId(
+                        employeeId
+                );
     }
 }

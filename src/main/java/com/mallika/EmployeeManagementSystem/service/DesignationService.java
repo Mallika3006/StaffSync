@@ -16,69 +16,74 @@ public class DesignationService {
         this.designationRepository = designationRepository;
     }
 
+
     // CREATE
     public Designation createDesignation(Designation designation) {
-        return designationRepository.save(designation);
+
+        return designationRepository.createDesignation(designation);
     }
+
 
     // GET ALL
     public List<Designation> getAllDesignations() {
-        return designationRepository.findAll();
+
+        return designationRepository.getAllDesignations();
     }
+
 
     // GET BY ID
     public Designation getDesignationById(Integer id) {
-        return designationRepository.findById(id)
+
+        return designationRepository.getDesignationById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Designation not found with id: " + id
-                        ));
+                        )
+                );
     }
+
 
     // UPDATE
     public Designation updateDesignation(
             Integer id,
             Designation designationDetails) {
 
-        Designation designation = getDesignationById(id);
+        // Check whether designation exists
+        getDesignationById(id);
 
-        designation.setDesignationTitle(
-                designationDetails.getDesignationTitle()
+        return designationRepository.updateDesignation(
+                id,
+                designationDetails
         );
-
-        designation.setMinSalary(
-                designationDetails.getMinSalary()
-        );
-
-        designation.setMaxSalary(
-                designationDetails.getMaxSalary()
-        );
-
-        return designationRepository.save(designation);
     }
+
 
     // DELETE
     public void deleteDesignation(Integer id) {
 
-        Designation designation = getDesignationById(id);
+        // Check whether designation exists
+        getDesignationById(id);
 
-        designationRepository.delete(designation);
+        designationRepository.deleteDesignation(id);
     }
+
 
     // SEARCH BY TITLE
     public List<Designation> searchByTitle(String title) {
-        return designationRepository
-                .findByDesignationTitleContainingIgnoreCase(title);
+
+        return designationRepository.searchByTitle(title);
     }
+
 
     // GET BY EXACT TITLE
     public Designation getDesignationByTitle(String title) {
 
         return designationRepository
-                .findByDesignationTitleIgnoreCase(title)
+                .getDesignationByTitle(title)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Designation not found with title: " + title
-                        ));
+                        )
+                );
     }
 }

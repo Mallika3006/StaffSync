@@ -5,9 +5,6 @@ import com.mallika.EmployeeManagementSystem.model.Project;
 import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.ProjectRepository;
 import com.mallika.EmployeeManagementSystem.repository.UserRepository;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,19 +23,21 @@ public class ProjectService {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
     }
+
     // CREATE
     public Project createProject(Project project) {
-        return projectRepository.save(project);
+        return projectRepository.createProject(project);
     }
 
     // GET ALL
     public List<Project> getAllProjects() {
-        return projectRepository.findAll();
+        return projectRepository.getAllProjects();
     }
 
     // GET BY ID
     public Project getProjectById(Integer id) {
-        return projectRepository.findById(id)
+
+        return projectRepository.getProjectById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Project not found with id: " + id
@@ -46,45 +45,55 @@ public class ProjectService {
     }
 
     // UPDATE
-    public Project updateProject(Integer id, Project projectDetails) {
+    public Project updateProject(
+            Integer id,
+            Project projectDetails) {
 
-        Project project = getProjectById(id);
-
-        project.setProjectName(projectDetails.getProjectName());
-        project.setStartDate(projectDetails.getStartDate());
-        project.setEndDate(projectDetails.getEndDate());
-
-        return projectRepository.save(project);
+        return projectRepository.updateProject(
+                id,
+                projectDetails
+        );
     }
 
     // DELETE
     public void deleteProject(Integer id) {
 
-        Project project = getProjectById(id);
+        boolean deleted = projectRepository.deleteProject(id);
 
-        projectRepository.delete(project);
+        if (!deleted) {
+            throw new ResourceNotFoundException(
+                    "Project not found with id: " + id
+            );
+        }
     }
 
     // SEARCH BY NAME
     public List<Project> searchByProjectName(String projectName) {
-        return projectRepository
-                .findByProjectNameContainingIgnoreCase(projectName);
+
+        return projectRepository.searchByProjectName(projectName);
     }
 
     // EXACT NAME
-    public List<Project> getByExactProjectName(String projectName) {
-        return projectRepository
-                .findByProjectNameIgnoreCase(projectName);
+    public List<Project> getByExactProjectName(
+            String projectName) {
+
+        return projectRepository.getProjectsByExactName(
+                projectName
+        );
     }
 
     // START DATE
-    public List<Project> getByStartDate(LocalDate startDate) {
-        return projectRepository.findByStartDate(startDate);
+    public List<Project> getByStartDate(
+            LocalDate startDate) {
+
+        return projectRepository.getByStartDate(startDate);
     }
 
     // END DATE
-    public List<Project> getByEndDate(LocalDate endDate) {
-        return projectRepository.findByEndDate(endDate);
+    public List<Project> getByEndDate(
+            LocalDate endDate) {
+
+        return projectRepository.getByEndDate(endDate);
     }
 
     // PROJECTS BETWEEN DATES
@@ -92,7 +101,7 @@ public class ProjectService {
             LocalDate startDate,
             LocalDate endDate) {
 
-        return projectRepository.findByStartDateBetween(
+        return projectRepository.getProjectsBetweenDates(
                 startDate,
                 endDate
         );
@@ -100,7 +109,8 @@ public class ProjectService {
 
     // ONGOING PROJECTS
     public List<Project> getOngoingProjects() {
-        return projectRepository.findByEndDateIsNull();
+
+        return projectRepository.getOngoingProjects();
     }
 
     // SORT
@@ -108,20 +118,22 @@ public class ProjectService {
             String field,
             String direction) {
 
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(field).descending()
-                : Sort.by(field).ascending();
-
-        return projectRepository.findAll(sort);
+        return projectRepository.sortProjects(
+                field,
+                direction
+        );
     }
 
     // GET PROJECTS OF LOGGED-IN EMPLOYEE'S TEAM
+    // Temporarily kept on JPA because
+    // Team-Project relationship will be converted later.
     public List<Project> getMyProjects() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String username = authentication.getName();
+        String username =
+                org.springframework.security.core.context.SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->

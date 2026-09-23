@@ -97,7 +97,7 @@ END;
 $$;
 
 
--- 7. UPDATE EMPLOYEE PROFILE
+-- UPDATE EMPLOYEE PROFILE
 CREATE OR REPLACE FUNCTION update_employee_profile(
     p_employee_id INTEGER,
     p_first_name VARCHAR,
@@ -105,12 +105,14 @@ CREATE OR REPLACE FUNCTION update_employee_profile(
     p_email VARCHAR,
     p_phone VARCHAR,
     p_date_of_birth DATE,
-    p_address VARCHAR
+    p_address VARCHAR,
+    p_profile_photo VARCHAR
 )
 RETURNS SETOF employees
 LANGUAGE plpgsql
 AS $$
 BEGIN
+
 UPDATE employees
 SET
     first_name = p_first_name,
@@ -118,33 +120,14 @@ SET
     email = p_email,
     phone = p_phone,
     date_of_birth = p_date_of_birth,
-    address = p_address
+    address = p_address,
+    profile_photo = p_profile_photo
 WHERE employee_id = p_employee_id;
 
 RETURN QUERY
 SELECT *
 FROM employees
 WHERE employee_id = p_employee_id;
-END;
-$$;
 
-
--- 8. UPDATE EMPLOYEE PROFILE PHOTO
-CREATE OR REPLACE FUNCTION update_employee_profile_photo(
-    p_employee_id INTEGER,
-    p_profile_photo VARCHAR
-)
-RETURNS SETOF employees
-LANGUAGE plpgsql
-AS $$
-BEGIN
-UPDATE employees
-SET profile_photo = p_profile_photo
-WHERE employee_id = p_employee_id;
-
-RETURN QUERY
-SELECT *
-FROM employees
-WHERE employee_id = p_employee_id;
 END;
 $$;

@@ -30,17 +30,18 @@ public class DepartmentService {
 
     // CREATE
     public Department createDepartment(Department department) {
-        return departmentRepository.save(department);
+        return departmentRepository.createDepartment(department);
     }
 
     // GET ALL
     public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
+        return departmentRepository.getAllDepartments();
     }
 
     // GET BY ID
     public Department getDepartmentById(Integer id) {
-        return departmentRepository.findById(id)
+
+        return departmentRepository.getDepartmentById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Department not found with id: " + id
@@ -52,29 +53,36 @@ public class DepartmentService {
             Integer id,
             Department departmentDetails) {
 
-        Department department = getDepartmentById(id);
+        getDepartmentById(id);
 
-        department.setDepartmentName(
-                departmentDetails.getDepartmentName()
-        );
+        Department updated =
+                departmentRepository.updateDepartment(
+                        id,
+                        departmentDetails
+                );
 
-        department.setLocation(
-                departmentDetails.getLocation()
-        );
+        if (updated == null) {
+            throw new ResourceNotFoundException(
+                    "Department not found with id: " + id
+            );
+        }
 
-        department.setDescription(
-                departmentDetails.getDescription()
-        );
-
-        return departmentRepository.save(department);
+        return updated;
     }
 
     // DELETE
     public void deleteDepartment(Integer id) {
 
-        Department department = getDepartmentById(id);
+        getDepartmentById(id);
 
-        departmentRepository.delete(department);
+        boolean deleted =
+                departmentRepository.deleteDepartment(id);
+
+        if (!deleted) {
+            throw new ResourceNotFoundException(
+                    "Department not found with id: " + id
+            );
+        }
     }
 
     // SEARCH BY NAME
@@ -96,7 +104,8 @@ public class DepartmentService {
     }
 
     // SEARCH BY LOCATION
-    public List<Department> getDepartmentsByLocation(String location) {
+    public List<Department> getDepartmentsByLocation(
+            String location) {
 
         return departmentRepository
                 .findByLocationContainingIgnoreCase(location);
@@ -108,7 +117,8 @@ public class DepartmentService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "User not found with username: " + username
+                                "User not found with username: "
+                                        + username
                         ));
 
         if (user.getEmployee() == null) {
@@ -117,13 +127,16 @@ public class DepartmentService {
             );
         }
 
-        Integer employeeId = user.getEmployee().getEmployeeId();
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
 
-        Team team = teamRepository.findByEmployeesEmployeeId(employeeId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Team not found for employee id: " + employeeId
-                        ));
+        Team team =
+                teamRepository.findByEmployeesEmployeeId(employeeId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Team not found for employee id: "
+                                                + employeeId
+                                ));
 
         if (team.getDepartment() == null) {
             throw new ResourceNotFoundException(

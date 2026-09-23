@@ -26,64 +26,114 @@ public class AttendanceService {
         this.userRepository = userRepository;
     }
 
+
+    // =========================================================
     // CREATE
-    public Attendance createAttendance(Attendance attendance) {
-        return attendanceRepository.save(attendance);
+    // =========================================================
+
+    public Attendance createAttendance(
+            Attendance attendance) {
+
+        return attendanceRepository
+                .createAttendance(attendance);
     }
 
+
+    // =========================================================
     // GET ALL
+    // =========================================================
+
     public List<Attendance> getAllAttendance() {
-        return attendanceRepository.findAll();
+
+        return attendanceRepository
+                .getAllAttendance();
     }
 
+
+    // =========================================================
     // GET BY ID
-    public Attendance getAttendanceById(Integer id) {
-        return attendanceRepository.findById(id)
+    // =========================================================
+
+    public Attendance getAttendanceById(
+            Integer id) {
+
+        return attendanceRepository
+                .getAttendanceById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Attendance not found with id: " + id
+                                "Attendance not found with id: "
+                                        + id
                         ));
     }
 
+
+    // =========================================================
     // UPDATE
+    // =========================================================
+
     public Attendance updateAttendance(
             Integer id,
             Attendance attendanceDetails) {
 
-        Attendance attendance = getAttendanceById(id);
-
-        attendance.setAttDate(attendanceDetails.getAttDate());
-        attendance.setStatus(attendanceDetails.getStatus());
-        attendance.setCheckInTime(attendanceDetails.getCheckInTime());
-        attendance.setCheckOutTime(attendanceDetails.getCheckOutTime());
-        attendance.setEmployee(attendanceDetails.getEmployee());
-
-        return attendanceRepository.save(attendance);
+        return attendanceRepository
+                .updateAttendance(
+                        id,
+                        attendanceDetails
+                );
     }
 
+
+    // =========================================================
     // DELETE
+    // =========================================================
+
     public void deleteAttendance(Integer id) {
 
-        Attendance attendance = getAttendanceById(id);
+        boolean deleted =
+                attendanceRepository
+                        .deleteAttendance(id);
 
-        attendanceRepository.delete(attendance);
+        if (!deleted) {
+            throw new ResourceNotFoundException(
+                    "Attendance not found with id: "
+                            + id
+            );
+        }
     }
 
+
+    // =========================================================
     // GET BY EMPLOYEE
-    public List<Attendance> getAttendanceByEmployee(Integer employeeId) {
+    // =========================================================
+
+    public List<Attendance> getAttendanceByEmployee(
+            Integer employeeId) {
 
         return attendanceRepository
-                .findByEmployeeEmployeeId(employeeId);
+                .findByEmployeeEmployeeId(
+                        employeeId
+                );
     }
 
+
+    // =========================================================
     // GET BY DATE
-    public List<Attendance> getAttendanceByDate(LocalDate date) {
+    // =========================================================
 
-        return attendanceRepository.findByAttDate(date);
+    public List<Attendance> getAttendanceByDate(
+            LocalDate date) {
+
+        return attendanceRepository
+                .findByAttDate(date);
     }
 
+
+    // =========================================================
     // GET BY EMPLOYEE AND DATE
-    public List<Attendance> getEmployeeAttendanceByDate(
+    // =========================================================
+
+    public List<Attendance>
+    getEmployeeAttendanceByDate(
             Integer employeeId,
             LocalDate date) {
 
@@ -94,15 +144,25 @@ public class AttendanceService {
                 );
     }
 
+
+    // =========================================================
     // GET BY STATUS
-    public List<Attendance> getAttendanceByStatus(String status) {
+    // =========================================================
+
+    public List<Attendance> getAttendanceByStatus(
+            String status) {
 
         return attendanceRepository
                 .findByStatusIgnoreCase(status);
     }
 
+
+    // =========================================================
     // GET EMPLOYEE ATTENDANCE BY STATUS
-    public List<Attendance> getEmployeeAttendanceByStatus(
+    // =========================================================
+
+    public List<Attendance>
+    getEmployeeAttendanceByStatus(
             Integer employeeId,
             String status) {
 
@@ -113,24 +173,42 @@ public class AttendanceService {
                 );
     }
 
+
+    // =========================================================
     // GET LOGGED-IN EMPLOYEE'S ATTENDANCE
+    // =========================================================
+
     public List<Attendance> getMyAttendance() {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
 
-        String username = authentication.getName();
+        String username =
+                authentication.getName();
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found"
-                        ));
+        User user =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found"
+                                ));
+
+        if (user.getEmployee() == null) {
+            throw new ResourceNotFoundException(
+                    "Employee not found"
+            );
+        }
 
         Integer employeeId =
-                user.getEmployee().getEmployeeId();
+                user.getEmployee()
+                        .getEmployeeId();
 
         return attendanceRepository
-                .findByEmployeeEmployeeId(employeeId);
+                .findByEmployeeEmployeeId(
+                        employeeId
+                );
     }
 }

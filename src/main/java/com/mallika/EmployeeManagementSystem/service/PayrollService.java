@@ -26,67 +26,116 @@ public class PayrollService {
         this.userRepository = userRepository;
     }
 
+
+    // =========================================================
     // CREATE
-    public Payroll createPayroll(Payroll payroll) {
-        return payrollRepository.save(payroll);
+    // =========================================================
+
+    public Payroll createPayroll(
+            Payroll payroll) {
+
+        return payrollRepository
+                .createPayroll(payroll);
     }
 
+
+    // =========================================================
     // GET ALL
+    // =========================================================
+
     public List<Payroll> getAllPayrolls() {
-        return payrollRepository.findAll();
+
+        return payrollRepository
+                .getAllPayrolls();
     }
 
+
+    // =========================================================
     // GET BY ID
-    public Payroll getPayrollById(Integer id) {
-        return payrollRepository.findById(id)
+    // =========================================================
+
+    public Payroll getPayrollById(
+            Integer id) {
+
+        return payrollRepository
+                .getPayrollById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Payroll not found with id: " + id
+                                "Payroll not found with id: "
+                                        + id
                         ));
     }
 
+
+    // =========================================================
     // UPDATE
+    // =========================================================
+
     public Payroll updatePayroll(
             Integer id,
             Payroll payrollDetails) {
 
-        Payroll payroll = getPayrollById(id);
-
-        payroll.setPayMonth(payrollDetails.getPayMonth());
-        payroll.setBasicSalary(payrollDetails.getBasicSalary());
-        payroll.setAllowances(payrollDetails.getAllowances());
-        payroll.setDeductions(payrollDetails.getDeductions());
-        payroll.setNetSalary(payrollDetails.getNetSalary());
-        payroll.setPaymentDate(payrollDetails.getPaymentDate());
-        payroll.setEmployee(payrollDetails.getEmployee());
-
-        return payrollRepository.save(payroll);
+        return payrollRepository
+                .updatePayroll(
+                        id,
+                        payrollDetails
+                );
     }
 
+
+    // =========================================================
     // DELETE
+    // =========================================================
+
     public void deletePayroll(Integer id) {
 
-        Payroll payroll = getPayrollById(id);
+        boolean deleted =
+                payrollRepository
+                        .deletePayroll(id);
 
-        payrollRepository.delete(payroll);
+        if (!deleted) {
+            throw new ResourceNotFoundException(
+                    "Payroll not found with id: "
+                            + id
+            );
+        }
     }
 
+
+    // =========================================================
     // GET BY EMPLOYEE
-    public List<Payroll> getPayrollsByEmployee(Integer employeeId) {
+    // =========================================================
+
+    public List<Payroll> getPayrollsByEmployee(
+            Integer employeeId) {
 
         return payrollRepository
-                .findByEmployeeEmployeeId(employeeId);
+                .findByEmployeeEmployeeId(
+                        employeeId
+                );
     }
 
+
+    // =========================================================
     // GET BY MONTH
-    public List<Payroll> getPayrollsByMonth(String payMonth) {
+    // =========================================================
+
+    public List<Payroll> getPayrollsByMonth(
+            String payMonth) {
 
         return payrollRepository
-                .findByPayMonthIgnoreCase(payMonth);
+                .findByPayMonthIgnoreCase(
+                        payMonth
+                );
     }
 
-    // GET BY EMPLOYEE AND MONTH
-    public List<Payroll> getEmployeePayrollByMonth(
+
+    // =========================================================
+    // EMPLOYEE + MONTH
+    // =========================================================
+
+    public List<Payroll>
+    getEmployeePayrollByMonth(
             Integer employeeId,
             String payMonth) {
 
@@ -97,16 +146,28 @@ public class PayrollService {
                 );
     }
 
-    // GET BY PAYMENT DATE
-    public List<Payroll> getPayrollsByPaymentDate(
+
+    // =========================================================
+    // BY PAYMENT DATE
+    // =========================================================
+
+    public List<Payroll>
+    getPayrollsByPaymentDate(
             LocalDate paymentDate) {
 
         return payrollRepository
-                .findByPaymentDate(paymentDate);
+                .findByPaymentDate(
+                        paymentDate
+                );
     }
 
-    // GET BY EMPLOYEE AND PAYMENT DATE
-    public List<Payroll> getEmployeePayrollByPaymentDate(
+
+    // =========================================================
+    // EMPLOYEE + PAYMENT DATE
+    // =========================================================
+
+    public List<Payroll>
+    getEmployeePayrollByPaymentDate(
             Integer employeeId,
             LocalDate paymentDate) {
 
@@ -117,24 +178,42 @@ public class PayrollService {
                 );
     }
 
-    // GET LOGGED-IN EMPLOYEE'S PAYROLL
+
+    // =========================================================
+    // LOGGED-IN EMPLOYEE'S PAYROLL
+    // =========================================================
+
     public List<Payroll> getMyPayrolls() {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
 
-        String username = authentication.getName();
+        String username =
+                authentication.getName();
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found"
-                        ));
+        User user =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found"
+                                ));
+
+        if (user.getEmployee() == null) {
+            throw new ResourceNotFoundException(
+                    "Employee not found"
+            );
+        }
 
         Integer employeeId =
-                user.getEmployee().getEmployeeId();
+                user.getEmployee()
+                        .getEmployeeId();
 
         return payrollRepository
-                .findByEmployeeEmployeeId(employeeId);
+                .findByEmployeeEmployeeId(
+                        employeeId
+                );
     }
 }

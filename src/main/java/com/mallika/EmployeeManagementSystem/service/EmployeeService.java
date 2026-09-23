@@ -37,9 +37,7 @@ public class EmployeeService {
 
     public Employee createEmployee(Employee employee) {
 
-        // Keep temporarily.
-        // We will convert this to CallableStatement next.
-
+        // Will be converted to CallableStatement later.
         throw new UnsupportedOperationException(
                 "Create employee will be converted to stored procedure"
         );
@@ -90,7 +88,15 @@ public class EmployeeService {
             );
         }
 
-        return user.getEmployee();
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+        return employeeRepository.getEmployeeById(employeeId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Employee not found with id: "
+                                        + employeeId
+                        ));
     }
 
 
@@ -102,9 +108,7 @@ public class EmployeeService {
             Integer id,
             Employee employeeDetails) {
 
-        // Keep temporarily.
-        // We will convert this to CallableStatement next.
-
+        // Will be converted to CallableStatement later.
         throw new UnsupportedOperationException(
                 "Update employee will be converted to stored procedure"
         );
@@ -117,9 +121,7 @@ public class EmployeeService {
 
     public void deleteEmployee(Integer id) {
 
-        // Keep temporarily.
-        // We will convert this to CallableStatement next.
-
+        // Will be converted to CallableStatement later.
         throw new UnsupportedOperationException(
                 "Delete employee will be converted to stored procedure"
         );
@@ -206,22 +208,23 @@ public class EmployeeService {
             String field,
             String direction) {
 
-        // Sorting will also be converted to SQL.
+        // Sorting will be converted to SQL later.
         throw new UnsupportedOperationException(
                 "Sorting will be converted to SQL"
         );
     }
 
 
-// =========================
-// UPDATE MY PROFILE
-// =========================
+    // =========================
+    // UPDATE MY PROFILE
+    // =========================
 
     public Employee updateMyProfile(
             String username,
             EmployeeUpdateDTO updateDetails) {
 
-        Employee employee = getMyProfile(username);
+        Employee employee =
+                getMyProfile(username);
 
         return employeeRepository.updateMyProfile(
                 employee.getEmployeeId(),
@@ -231,14 +234,15 @@ public class EmployeeService {
 
 
     // =========================
-// PROFILE PHOTO
-// =========================
+    // UPDATE PROFILE PHOTO
+    // =========================
 
     public Employee updateProfilePhoto(
             String username,
             MultipartFile photo) {
 
-        Employee employee = getMyProfile(username);
+        Employee employee =
+                getMyProfile(username);
 
         try {
 
@@ -255,7 +259,7 @@ public class EmployeeService {
                             + photo.getOriginalFilename();
 
             Path filePath =
-                    Paths.get(uploadDir + fileName);
+                    Paths.get(uploadDir, fileName);
 
             Files.write(
                     filePath,
@@ -279,3 +283,4 @@ public class EmployeeService {
         }
     }
 }
+

@@ -23,6 +23,7 @@ public class EmployeeRepository {
         this.dataSource = dataSource;
     }
 
+
     // =========================
     // GET ALL EMPLOYEES
     // =========================
@@ -45,6 +46,7 @@ public class EmployeeRepository {
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error fetching employees", e
             );
@@ -73,11 +75,15 @@ public class EmployeeRepository {
             try (ResultSet resultSet = statement.executeQuery()) {
 
                 if (resultSet.next()) {
-                    return Optional.of(mapEmployee(resultSet));
+
+                    return Optional.of(
+                            mapEmployee(resultSet)
+                    );
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error fetching employee with id: " + id,
                     e
@@ -96,7 +102,8 @@ public class EmployeeRepository {
 
         List<Employee> employees = new ArrayList<>();
 
-        String sql = "{call search_employee_by_name(?)}";
+        String sql =
+                "{call search_employee_by_name(?)}";
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -106,14 +113,19 @@ public class EmployeeRepository {
 
             statement.setString(1, name);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 while (resultSet.next()) {
-                    employees.add(mapEmployee(resultSet));
+
+                    employees.add(
+                            mapEmployee(resultSet)
+                    );
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error searching employees", e
             );
@@ -127,9 +139,11 @@ public class EmployeeRepository {
     // SEARCH BY EMAIL
     // =========================
 
-    public Optional<Employee> getEmployeeByEmail(String email) {
+    public Optional<Employee> getEmployeeByEmail(
+            String email) {
 
-        String sql = "{call get_employee_by_email(?)}";
+        String sql =
+                "{call get_employee_by_email(?)}";
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -139,14 +153,19 @@ public class EmployeeRepository {
 
             statement.setString(1, email);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (resultSet.next()) {
-                    return Optional.of(mapEmployee(resultSet));
+
+                    return Optional.of(
+                            mapEmployee(resultSet)
+                    );
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error fetching employee by email",
                     e
@@ -164,9 +183,11 @@ public class EmployeeRepository {
     public List<Employee> getEmployeesByDesignation(
             Integer designationId) {
 
-        List<Employee> employees = new ArrayList<>();
+        List<Employee> employees =
+                new ArrayList<>();
 
-        String sql = "{call get_employees_by_designation(?)}";
+        String sql =
+                "{call get_employees_by_designation(?)}";
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -176,14 +197,19 @@ public class EmployeeRepository {
 
             statement.setInt(1, designationId);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 while (resultSet.next()) {
-                    employees.add(mapEmployee(resultSet));
+
+                    employees.add(
+                            mapEmployee(resultSet)
+                    );
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error fetching employees by designation",
                     e
@@ -201,9 +227,11 @@ public class EmployeeRepository {
     public List<Employee> getEmployeesByTeam(
             Integer teamId) {
 
-        List<Employee> employees = new ArrayList<>();
+        List<Employee> employees =
+                new ArrayList<>();
 
-        String sql = "{call get_employees_by_team(?)}";
+        String sql =
+                "{call get_employees_by_team(?)}";
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -213,14 +241,19 @@ public class EmployeeRepository {
 
             statement.setInt(1, teamId);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 while (resultSet.next()) {
-                    employees.add(mapEmployee(resultSet));
+
+                    employees.add(
+                            mapEmployee(resultSet)
+                    );
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error fetching employees by team",
                     e
@@ -261,6 +294,7 @@ public class EmployeeRepository {
         );
 
         if (rs.getDate("date_of_birth") != null) {
+
             employee.setDateOfBirth(
                     rs.getDate("date_of_birth")
                             .toLocalDate()
@@ -268,6 +302,7 @@ public class EmployeeRepository {
         }
 
         if (rs.getDate("hire_date") != null) {
+
             employee.setHireDate(
                     rs.getDate("hire_date")
                             .toLocalDate()
@@ -285,7 +320,8 @@ public class EmployeeRepository {
         return employee;
     }
 
-    // =========================
+
+// =========================
 // UPDATE MY PROFILE
 // =========================
 
@@ -293,7 +329,8 @@ public class EmployeeRepository {
             Integer employeeId,
             EmployeeUpdateDTO updateDetails) {
 
-        String sql = "{call update_employee_profile(?, ?, ?, ?, ?, ?, ?)}";
+        String sql =
+                "{call update_employee_profile(?, ?, ?, ?, ?, ?, ?, ?)}";
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -301,45 +338,90 @@ public class EmployeeRepository {
                         connection.prepareCall(sql)
         ) {
 
-            statement.setInt(1, employeeId);
-            statement.setString(2, updateDetails.getFirstName());
-            statement.setString(3, updateDetails.getLastName());
-            statement.setString(4, updateDetails.getEmail());
-            statement.setString(5, updateDetails.getPhone());
+            // 1. employee_id
+            statement.setInt(
+                    1,
+                    employeeId
+            );
 
+            // 2. first_name
+            statement.setString(
+                    2,
+                    updateDetails.getFirstName()
+            );
+
+            // 3. last_name
+            statement.setString(
+                    3,
+                    updateDetails.getLastName()
+            );
+
+            // 4. email
+            statement.setString(
+                    4,
+                    updateDetails.getEmail()
+            );
+
+            // 5. phone
+            statement.setString(
+                    5,
+                    updateDetails.getPhone()
+            );
+
+            // 6. date_of_birth
             if (updateDetails.getDateOfBirth() != null) {
+
                 statement.setDate(
                         6,
                         java.sql.Date.valueOf(
                                 updateDetails.getDateOfBirth()
                         )
                 );
+
             } else {
-                statement.setNull(6, java.sql.Types.DATE);
+
+                statement.setNull(
+                        6,
+                        java.sql.Types.DATE
+                );
             }
 
-            statement.setString(7, updateDetails.getAddress());
+            // 7. address
+            statement.setString(
+                    7,
+                    updateDetails.getAddress()
+            );
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            // 8. profile_photo
+            statement.setString(
+                    8,
+                    updateDetails.getProfilePhoto()
+            );
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (resultSet.next()) {
+
                     return mapEmployee(resultSet);
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error updating employee profile",
                     e
             );
         }
 
-        throw new RuntimeException(
+        throw new ResourceNotFoundException(
                 "Employee not found with id: " + employeeId
         );
     }
 
-    // =========================
+
+// =========================
 // UPDATE PROFILE PHOTO
 // =========================
 
@@ -347,8 +429,16 @@ public class EmployeeRepository {
             Integer employeeId,
             String profilePhoto) {
 
+        // First get the existing employee
+        Employee employee = getEmployeeById(employeeId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Employee not found with id: " + employeeId
+                        )
+                );
+
         String sql =
-                "{call update_employee_profile_photo(?, ?)}";
+                "{call update_employee_profile(?, ?, ?, ?, ?, ?, ?, ?)}";
 
         try (
                 Connection connection = dataSource.getConnection();
@@ -356,12 +446,71 @@ public class EmployeeRepository {
                         connection.prepareCall(sql)
         ) {
 
-            statement.setInt(1, employeeId);
-            statement.setString(2, profilePhoto);
+            // 1. employee_id
+            statement.setInt(
+                    1,
+                    employeeId
+            );
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            // 2. first_name
+            statement.setString(
+                    2,
+                    employee.getFirstName()
+            );
+
+            // 3. last_name
+            statement.setString(
+                    3,
+                    employee.getLastName()
+            );
+
+            // 4. email
+            statement.setString(
+                    4,
+                    employee.getEmail()
+            );
+
+            // 5. phone
+            statement.setString(
+                    5,
+                    employee.getPhone()
+            );
+
+            // 6. date_of_birth
+            if (employee.getDateOfBirth() != null) {
+
+                statement.setDate(
+                        6,
+                        java.sql.Date.valueOf(
+                                employee.getDateOfBirth()
+                        )
+                );
+
+            } else {
+
+                statement.setNull(
+                        6,
+                        java.sql.Types.DATE
+                );
+            }
+
+            // 7. address
+            statement.setString(
+                    7,
+                    employee.getAddress()
+            );
+
+            // 8. new profile photo
+            statement.setString(
+                    8,
+                    profilePhoto
+            );
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (resultSet.next()) {
+
                     return mapEmployee(resultSet);
                 }
             }

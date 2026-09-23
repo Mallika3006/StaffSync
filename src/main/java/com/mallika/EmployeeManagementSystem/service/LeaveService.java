@@ -26,64 +26,102 @@ public class LeaveService {
         this.userRepository = userRepository;
     }
 
+
+    // =========================================================
     // CREATE
+    // =========================================================
+
     public Leave createLeave(Leave leave) {
-        return leaveRepository.save(leave);
+
+        return leaveRepository.createLeave(leave);
     }
 
+
+    // =========================================================
     // GET ALL
+    // =========================================================
+
     public List<Leave> getAllLeaves() {
-        return leaveRepository.findAll();
+
+        return leaveRepository.getAllLeaves();
     }
 
+
+    // =========================================================
     // GET BY ID
+    // =========================================================
+
     public Leave getLeaveById(Integer id) {
-        return leaveRepository.findById(id)
+
+        return leaveRepository
+                .getLeaveById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Leave not found with id: " + id
                         ));
     }
 
+
+    // =========================================================
     // UPDATE
+    // =========================================================
+
     public Leave updateLeave(
             Integer id,
             Leave leaveDetails) {
 
-        Leave leave = getLeaveById(id);
-
-        leave.setFromDate(leaveDetails.getFromDate());
-        leave.setToDate(leaveDetails.getToDate());
-        leave.setReason(leaveDetails.getReason());
-        leave.setStatus(leaveDetails.getStatus());
-        leave.setEmployee(leaveDetails.getEmployee());
-
-        return leaveRepository.save(leave);
+        return leaveRepository.updateLeave(
+                id,
+                leaveDetails
+        );
     }
 
+
+    // =========================================================
     // DELETE
+    // =========================================================
+
     public void deleteLeave(Integer id) {
 
-        Leave leave = getLeaveById(id);
+        boolean deleted =
+                leaveRepository.deleteLeave(id);
 
-        leaveRepository.delete(leave);
+        if (!deleted) {
+            throw new ResourceNotFoundException(
+                    "Leave not found with id: " + id
+            );
+        }
     }
 
+
+    // =========================================================
     // GET BY EMPLOYEE
-    public List<Leave> getLeavesByEmployee(Integer employeeId) {
+    // =========================================================
+
+    public List<Leave> getLeavesByEmployee(
+            Integer employeeId) {
 
         return leaveRepository
                 .findByEmployeeEmployeeId(employeeId);
     }
 
+
+    // =========================================================
     // GET BY STATUS
-    public List<Leave> getLeavesByStatus(String status) {
+    // =========================================================
+
+    public List<Leave> getLeavesByStatus(
+            String status) {
 
         return leaveRepository
                 .findByStatusIgnoreCase(status);
     }
 
+
+    // =========================================================
     // GET EMPLOYEE LEAVES BY STATUS
+    // =========================================================
+
     public List<Leave> getEmployeeLeavesByStatus(
             Integer employeeId,
             String status) {
@@ -95,42 +133,74 @@ public class LeaveService {
                 );
     }
 
+
+    // =========================================================
     // GET BY FROM DATE
-    public List<Leave> getLeavesByFromDate(LocalDate fromDate) {
+    // =========================================================
 
-        return leaveRepository.findByFromDate(fromDate);
+    public List<Leave> getLeavesByFromDate(
+            LocalDate fromDate) {
+
+        return leaveRepository
+                .findByFromDate(fromDate);
     }
 
+
+    // =========================================================
     // GET BY TO DATE
-    public List<Leave> getLeavesByToDate(LocalDate toDate) {
+    // =========================================================
 
-        return leaveRepository.findByToDate(toDate);
+    public List<Leave> getLeavesByToDate(
+            LocalDate toDate) {
+
+        return leaveRepository
+                .findByToDate(toDate);
     }
 
+
+    // =========================================================
     // GET LEAVES BETWEEN DATES
+    // =========================================================
+
     public List<Leave> getLeavesBetweenDates(
             LocalDate startDate,
             LocalDate endDate) {
 
-        return leaveRepository.findByFromDateBetween(
-                startDate,
-                endDate
-        );
+        return leaveRepository
+                .findByFromDateBetween(
+                        startDate,
+                        endDate
+                );
     }
 
+
+    // =========================================================
     // GET LOGGED-IN EMPLOYEE'S LEAVES
+    // =========================================================
+
     public List<Leave> getMyLeaves() {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
 
-        String username = authentication.getName();
+        String username =
+                authentication.getName();
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found"
-                        ));
+        User user =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found"
+                                ));
+
+        if (user.getEmployee() == null) {
+            throw new ResourceNotFoundException(
+                    "Employee not found"
+            );
+        }
 
         Integer employeeId =
                 user.getEmployee().getEmployeeId();
