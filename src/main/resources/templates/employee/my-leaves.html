@@ -11,82 +11,753 @@
 
 <div class="container">
 
-    ```
     <h1>My Leaves</h1>
 
-    <div class="card" id="leaves">
-        <p class="loading">Loading leaves...</p>
+
+    <!-- =====================================================
+         APPLY FOR LEAVE
+         ===================================================== -->
+
+    <div class="card">
+
+        <h3>Apply for Leave</h3>
+
+        <form id="leaveForm">
+
+            <div>
+                <label>From Date:</label>
+
+                <input
+                        type="date"
+                        id="fromDate"
+                        required>
+            </div>
+
+            <br>
+
+
+            <div>
+                <label>To Date:</label>
+
+                <input
+                        type="date"
+                        id="toDate"
+                        required>
+            </div>
+
+            <br>
+
+
+            <div>
+                <label>Reason:</label>
+
+                <textarea
+                        id="reason"
+                        rows="4"
+                        required></textarea>
+            </div>
+
+            <br>
+
+
+            <button type="submit">
+                Apply for Leave
+            </button>
+
+        </form>
+
+
+        <p id="formMessage"></p>
+
     </div>
+
+
+    <!-- =====================================================
+         EXISTING LEAVES
+         ===================================================== -->
+
+    <div class="card" id="leaves">
+
+        <p class="loading">
+            Loading leaves...
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         BACK TO DASHBOARD
+         ===================================================== -->
 
     <a class="back-link" href="/employee-dashboard">
         ← Back to Dashboard
     </a>
-    ```
 
 </div>
 
+
 <script>
 
-    fetch('/leaves/me')
-        .then(response => {
 
-            if (!response.ok) {
-                throw new Error("Failed to load leaves");
+    // =========================================================
+    // SET MINIMUM DATE
+    // Only tomorrow and future dates are allowed
+    // =========================================================
+
+    function setMinimumDate() {
+
+        const tomorrow = new Date();
+
+        tomorrow.setDate(
+            tomorrow.getDate() + 1
+        );
+
+
+        const year =
+            tomorrow.getFullYear();
+
+
+        const month =
+            String(
+                tomorrow.getMonth() + 1
+            ).padStart(2, '0');
+
+
+        const day =
+            String(
+                tomorrow.getDate()
+            ).padStart(2, '0');
+
+
+        const minimumDate =
+            `${year}-${month}-${day}`;
+
+
+        // From date cannot be today or past
+        document.getElementById("fromDate").min =
+            minimumDate;
+
+
+        // To date initially cannot be today or past
+        document.getElementById("toDate").min =
+            minimumDate;
+    }
+
+
+
+    // =========================================================
+    // UPDATE TO DATE MINIMUM
+    // To date must be >= From date
+    // =========================================================
+
+    document.getElementById("fromDate")
+        .addEventListener("change", function() {
+
+            const fromDate = this.value;
+
+            const toDate =
+                document.getElementById("toDate");
+
+
+            if (fromDate) {
+
+                // To date cannot be before From date
+                toDate.min = fromDate;
+
+
+                // If selected To Date is before From Date,
+                // clear it
+                if (
+                    toDate.value &&
+                    toDate.value < fromDate
+                ) {
+
+                    toDate.value = "";
+                }
             }
 
-            return response.json();
-        })
+        });
 
-        .then(leaveList => {
 
-            const leavesDiv =
-                document.getElementById("leaves");
 
-            if (leaveList.length === 0) {
+    // Set minimum dates when page loads
+    setMinimumDate();
 
-                leavesDiv.innerHTML =
-                    "<p class='empty-message'>No leave records found.</p>";
 
-                return;
-            }
 
-            let html = `
-                <table>
+    // =========================================================
+    // CREATE LEAVE TABLE
+    // =========================================================
 
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                    </tr>
+    function createLeaveTable(
+        leaves,
+        showWithdrawButton
+    ) {
+
+        // No records in this section
+        if (leaves.length === 0) {
+
+            return `
+                <p class="empty-message">
+                    No records found.
+                </p>
+            `;
+        }
+
+
+        let html = `
+
+            <table>
+
+                <tr>
+
+                    <th>From</th>
+
+                    <th>To</th>
+
+                    <th>Reason</th>
+
+                    <th>Status</th>
+
+                    ${showWithdrawButton
+            ? "<th>Action</th>"
+            : ""
+        }
+
+                </tr>
+
+        `;
+
+
+        leaves.forEach(leave => {
+
+            html += `
+
+                <tr>
+
+                    <td>
+                        ${leave.fromDate}
+                    </td>
+
+                    <td>
+                        ${leave.toDate}
+                    </td>
+
+                    <td>
+                        ${leave.reason}
+                    </td>
+
+                    <td>
+                        ${leave.status}
+                    </td>
+
             `;
 
-            leaveList.forEach(leave => {
+
+            // =================================================
+            // WITHDRAW BUTTON
+            // Only PENDING leaves can be withdrawn
+            // =================================================
+
+            if (showWithdrawButton) {
 
                 html += `
-                    <tr>
-                        <td>${leave.fromDate}</td>
-                        <td>${leave.toDate}</td>
-                        <td>${leave.reason}</td>
-                        <td>${leave.status}</td>
-                    </tr>
+
+                    <td>
+
+                        <button
+                            onclick="withdrawLeave(
+                                ${leave.leaveId}
+                            )">
+
+                            Withdraw
+
+                        </button>
+
+                    </td>
+
                 `;
+
+            }
+
+
+            html += `
+
+                </tr>
+
+            `;
+
+        });
+
+
+        html += `
+
+            </table>
+
+        `;
+
+
+        return html;
+
+    }
+
+
+
+    // =========================================================
+    // LOAD MY LEAVES
+    // =========================================================
+
+    function loadLeaves() {
+
+        fetch('/leaves/me')
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load leaves"
+                    );
+                }
+
+                return response.json();
+
+            })
+
+
+            .then(leaveList => {
+
+                const leavesDiv =
+                    document.getElementById("leaves");
+
+
+                // =================================================
+                // NO LEAVES
+                // =================================================
+
+                if (leaveList.length === 0) {
+
+                    leavesDiv.innerHTML =
+                        "<h3>My Leave Records</h3>" +
+                        "<p class='empty-message'>" +
+                        "No leave records found." +
+                        "</p>";
+
+                    return;
+                }
+
+
+
+                // =================================================
+                // SEPARATE LEAVES BY STATUS
+                // =================================================
+
+                const pendingLeaves =
+                    leaveList.filter(
+                        leave =>
+                            leave.status &&
+                            leave.status.toLowerCase() === "pending"
+                    );
+
+
+                const approvedLeaves =
+                    leaveList.filter(
+                        leave =>
+                            leave.status &&
+                            leave.status.toLowerCase() === "approved"
+                    );
+
+
+                const withdrawnLeaves =
+                    leaveList.filter(
+                        leave =>
+                            leave.status &&
+                            leave.status.toLowerCase() === "withdrawn"
+                    );
+
+
+                const rejectedLeaves =
+                    leaveList.filter(
+                        leave =>
+                            leave.status &&
+                            leave.status.toLowerCase() === "rejected"
+                    );
+
+
+
+                // =================================================
+                // DISPLAY LEAVE RECORDS
+                // =================================================
+
+                let html = `
+
+                    <h3>My Leave Records</h3>
+
+
+                    <!-- ================================
+                         PENDING
+                         ================================ -->
+
+                    <details>
+
+                        <summary>
+                            Pending
+                        </summary>
+
+                        ${createLeaveTable(
+                    pendingLeaves,
+                    true
+                )}
+
+                    </details>
+
+
+                    <br>
+
+
+                    <!-- ================================
+                         APPROVED
+                         ================================ -->
+
+                    <details>
+
+                        <summary>
+                            Approved
+                        </summary>
+
+                        ${createLeaveTable(
+                    approvedLeaves,
+                    false
+                )}
+
+                    </details>
+
+
+                    <br>
+
+
+                    <!-- ================================
+                         WITHDRAWN
+                         ================================ -->
+
+                    <details>
+
+                        <summary>
+                            Withdrawn
+                        </summary>
+
+                        ${createLeaveTable(
+                    withdrawnLeaves,
+                    false
+                )}
+
+                    </details>
+
+
+                    <br>
+
+
+                    <!-- ================================
+                         REJECTED
+                         ================================ -->
+
+                    <details>
+
+                        <summary>
+                            Rejected
+                        </summary>
+
+                        ${createLeaveTable(
+                    rejectedLeaves,
+                    false
+                )}
+
+                    </details>
+
+                `;
+
+
+                leavesDiv.innerHTML = html;
+
+            })
+
+
+            .catch(error => {
+
+                document.getElementById("leaves").innerHTML =
+
+                    "<p class='error-message'>" +
+
+                    "Unable to load leaves." +
+
+                    "</p>";
+
+                console.error(error);
+
             });
 
-            html += `</table>`;
+    }
 
-            leavesDiv.innerHTML = html;
+
+
+    // =========================================================
+    // APPLY FOR LEAVE
+    // =========================================================
+
+    document.getElementById("leaveForm")
+
+        .addEventListener(
+            "submit",
+            function(event) {
+
+                event.preventDefault();
+
+
+                const fromDate =
+                    document.getElementById(
+                        "fromDate"
+                    ).value;
+
+
+                const toDate =
+                    document.getElementById(
+                        "toDate"
+                    ).value;
+
+
+                const reason =
+                    document.getElementById(
+                        "reason"
+                    ).value.trim();
+
+
+                const formMessage =
+                    document.getElementById(
+                        "formMessage"
+                    );
+
+
+
+                // =================================================
+                // DATE VALIDATION
+                // =================================================
+
+                const tomorrow = new Date();
+
+                tomorrow.setHours(
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+                tomorrow.setDate(
+                    tomorrow.getDate() + 1
+                );
+
+
+                const selectedFromDate =
+                    new Date(fromDate);
+
+
+                const selectedToDate =
+                    new Date(toDate);
+
+
+
+                // From date must be tomorrow or later
+
+                if (selectedFromDate < tomorrow) {
+
+                    formMessage.innerText =
+                        "From date must be an upcoming date.";
+
+                    return;
+                }
+
+
+
+                // To date must be tomorrow or later
+
+                if (selectedToDate < tomorrow) {
+
+                    formMessage.innerText =
+                        "To date must be an upcoming date.";
+
+                    return;
+                }
+
+
+
+                // To date must be same as or after From date
+
+                if (selectedToDate < selectedFromDate) {
+
+                    formMessage.innerText =
+                        "To date must be on or after From date.";
+
+                    return;
+                }
+
+
+
+                // Reason validation
+
+                if (reason === "") {
+
+                    formMessage.innerText =
+                        "Please enter a reason.";
+
+                    return;
+                }
+
+
+
+                // =================================================
+                // LEAVE OBJECT
+                // Employee and status are set by backend
+                // =================================================
+
+                const leave = {
+
+                    fromDate: fromDate,
+
+                    toDate: toDate,
+
+                    reason: reason
+
+                };
+
+
+
+                // =================================================
+                // SEND REQUEST
+                // =================================================
+
+                fetch('/leaves', {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json'
+
+                    },
+
+                    body: JSON.stringify(leave)
+
+                })
+
+
+                    .then(response => {
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                "Failed to apply for leave"
+                            );
+                        }
+
+                        return response.json();
+
+                    })
+
+
+                    .then(() => {
+
+                        formMessage.innerText =
+                            "Leave applied successfully.";
+
+
+                        document.getElementById(
+                            "leaveForm"
+                        ).reset();
+
+
+                        // Reset minimum dates
+                        setMinimumDate();
+
+
+                        // Reload records
+                        loadLeaves();
+
+                    })
+
+
+                    .catch(error => {
+
+                        formMessage.innerText =
+                            "Unable to apply for leave.";
+
+                        console.error(error);
+
+                    });
+
+            }
+        );
+
+
+
+    // =========================================================
+    // WITHDRAW LEAVE
+    // =========================================================
+
+    function withdrawLeave(leaveId) {
+
+        if (!confirm(
+            "Are you sure you want to withdraw this leave?"
+        )) {
+            return;
+        }
+
+
+        fetch('/leaves/' + leaveId + '/withdraw', {
+
+            method: 'PUT'
+
         })
 
-        .catch(error => {
+            .then(response => {
 
-            document.getElementById("leaves").innerHTML =
-                "<p class='error-message'>Unable to load leaves.</p>";
+                if (!response.ok) {
 
-            console.error(error);
-        });
+                    throw new Error(
+                        "Failed to withdraw leave"
+                    );
+                }
+
+                return response.json();
+            })
+
+            .then(() => {
+
+                alert(
+                    "Leave withdrawn successfully."
+                );
+
+                loadLeaves();
+            })
+
+            .catch(error => {
+
+                alert(
+                    "Unable to withdraw leave."
+                );
+
+                console.error(error);
+            });
+    }
+
+
+    // =========================================================
+    // INITIAL LOAD
+    // =========================================================
+
+    loadLeaves();
 
 </script>
 
 </body>
+
 </html>

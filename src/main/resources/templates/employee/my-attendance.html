@@ -15,8 +15,13 @@
     <h1>My Attendance</h1>
 
     <div class="card" id="attendance">
-        <p class="loading">Loading attendance...</p>
+
+        <p class="loading">
+            Loading attendance...
+        </p>
+
     </div>
+
 
     <a class="back-link" href="/employee-dashboard">
         ← Back to Dashboard
@@ -27,66 +32,119 @@
 
 <script>
 
+    // =========================================================
+    // LOAD MY ATTENDANCE
+    // =========================================================
+
     fetch('/attendance/me')
+
         .then(response => {
 
             if (!response.ok) {
-                throw new Error("Failed to load attendance");
+
+                throw new Error(
+                    "Failed to load attendance"
+                );
+
             }
 
             return response.json();
+
         })
+
 
         .then(attendanceList => {
 
             const attendanceDiv =
                 document.getElementById("attendance");
 
-            if (attendanceList.length === 0) {
 
-                attendanceDiv.innerHTML =
-                    "<p class='empty-message'>No attendance records found.</p>";
+            // =====================================================
+            // COUNT PRESENT DAYS
+            // =====================================================
 
-                return;
-            }
+            const presentDays =
+                attendanceList.filter(attendance =>
 
-            let html = `
-                <table>
+                    attendance.status &&
 
-                    <tr>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Check In</th>
-                        <th>Check Out</th>
-                    </tr>
+                    attendance.status.toLowerCase() === "present"
+
+                ).length;
+
+
+            // =====================================================
+            // COUNT ABSENT DAYS
+            // =====================================================
+
+            const absentDays =
+                attendanceList.filter(attendance =>
+
+                    attendance.status &&
+
+                    attendance.status.toLowerCase() === "absent"
+
+                ).length;
+
+
+            // =====================================================
+            // DISPLAY ATTENDANCE SUMMARY
+            // =====================================================
+
+            attendanceDiv.innerHTML = `
+
+                <h3>Attendance Summary</h3>
+
+                <div class="attendance-summary">
+
+                    <div class="attendance-box">
+
+                        <h4>Days Present</h4>
+
+                        <p>
+                            ${presentDays}
+                        </p>
+
+                    </div>
+
+
+                    <div class="attendance-box">
+
+                        <h4>Days Absent</h4>
+
+                        <p>
+                            ${absentDays}
+                        </p>
+
+                    </div>
+
+                </div>
+
             `;
 
-            attendanceList.forEach(attendance => {
-
-                html += `
-                    <tr>
-                        <td>${attendance.attDate}</td>
-                        <td>${attendance.status}</td>
-                        <td>${attendance.checkIn ?? "-"}</td>
-                        <td>${attendance.checkOut ?? "-"}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</table>`;
-
-            attendanceDiv.innerHTML = html;
         })
+
+
+        // =========================================================
+        // ERROR HANDLING
+        // =========================================================
 
         .catch(error => {
 
             document.getElementById("attendance").innerHTML =
-                "<p class='error-message'>Unable to load attendance.</p>";
+
+                "<p class='error-message'>" +
+
+                "Unable to load attendance." +
+
+                "</p>";
 
             console.error(error);
+
         });
 
 </script>
 
 </body>
+
 </html>

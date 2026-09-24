@@ -4,9 +4,14 @@ import com.mallika.EmployeeManagementSystem.dto.LoginRequest;
 import com.mallika.EmployeeManagementSystem.service.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+import java.util.Map;
+
+@Controller
 public class LoginController {
 
     private final AuthenticationManager authenticationManager;
@@ -20,16 +25,43 @@ public class LoginController {
         this.jwtService = jwtService;
     }
 
+    // Show login page
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login/login";
+    }
+
+    // Authenticate user
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
+    @ResponseBody
+    public Map<String, String> login(
+            @RequestBody LoginRequest request) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
+                );
+
+        UserDetails userDetails =
+                (UserDetails) authentication.getPrincipal();
+
+        String token =
+                jwtService.generateToken(
+                        userDetails.getUsername()
+                );
+
+        String role =
+                userDetails.getAuthorities()
+                        .iterator()
+                        .next()
+                        .getAuthority();
+
+        return Map.of(
+                "token", token,
+                "role", role
         );
-
-        return jwtService.generateToken(request.getUsername());
     }
 }

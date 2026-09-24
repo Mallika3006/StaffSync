@@ -150,4 +150,14 @@ public class LeaveController {
                 )
         );
     }
+
+    // WITHDRAW LEAVE
+    @PutMapping("/{id}/withdraw")
+    public ResponseEntity<Leave> withdrawLeave(
+            @PathVariable Integer id) {
+
+        return ResponseEntity.ok(
+                leaveService.withdrawLeave(id)
+        );
+    }
 }

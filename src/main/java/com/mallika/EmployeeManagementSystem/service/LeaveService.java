@@ -1,6 +1,7 @@
 package com.mallika.EmployeeManagementSystem.service;
 
 import com.mallika.EmployeeManagementSystem.exception.ResourceNotFoundException;
+import com.mallika.EmployeeManagementSystem.model.Employee;
 import com.mallika.EmployeeManagementSystem.model.Leave;
 import com.mallika.EmployeeManagementSystem.model.User;
 import com.mallika.EmployeeManagementSystem.repository.LeaveRepository;
@@ -28,10 +29,49 @@ public class LeaveService {
 
 
     // =========================================================
-    // CREATE
+    // CREATE LEAVE
     // =========================================================
 
     public Leave createLeave(Leave leave) {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String username =
+                authentication.getName();
+
+        User user =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found: "
+                                                + username
+                                ));
+
+        if (user.getEmployee() == null ||
+                user.getEmployee().getEmployeeId() == null) {
+
+            throw new ResourceNotFoundException(
+                    "Employee not found for user: "
+                            + username
+            );
+        }
+
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+        Employee employee =
+                new Employee();
+
+        employee.setEmployeeId(employeeId);
+
+        leave.setEmployee(employee);
+
+        // Always PENDING when employee applies
+        leave.setStatus("PENDING");
 
         return leaveRepository.createLeave(leave);
     }
@@ -57,7 +97,8 @@ public class LeaveService {
                 .getLeaveById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Leave not found with id: " + id
+                                "Leave not found with id: "
+                                        + id
                         ));
     }
 
@@ -78,6 +119,87 @@ public class LeaveService {
 
 
     // =========================================================
+    // WITHDRAW LEAVE
+    // =========================================================
+
+    public Leave withdrawLeave(Integer id) {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String username =
+                authentication.getName();
+
+
+        // Find logged-in user
+        User user =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "User not found: "
+                                                + username
+                                ));
+
+
+        // Make sure employee exists
+        if (user.getEmployee() == null ||
+                user.getEmployee().getEmployeeId() == null) {
+
+            throw new ResourceNotFoundException(
+                    "Employee not found for user: "
+                            + username
+            );
+        }
+
+
+        Integer employeeId =
+                user.getEmployee().getEmployeeId();
+
+
+        // Get leave
+        Leave leave =
+                leaveRepository
+                        .getLeaveById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Leave not found with id: "
+                                                + id
+                                ));
+
+
+        // Make sure leave belongs to logged-in employee
+        if (leave.getEmployee() == null ||
+                leave.getEmployee().getEmployeeId() == null ||
+                !employeeId.equals(
+                        leave.getEmployee().getEmployeeId()
+                )) {
+
+            throw new RuntimeException(
+                    "You are not allowed to withdraw this leave"
+            );
+        }
+
+
+        // Only PENDING leave can be withdrawn
+        if (!"PENDING".equalsIgnoreCase(
+                leave.getStatus()
+        )) {
+
+            throw new RuntimeException(
+                    "Only pending leave can be withdrawn"
+            );
+        }
+
+
+        // Call JDBC repository
+        return leaveRepository.withdrawLeave(id);
+    }
+
+
+    // =========================================================
     // DELETE
     // =========================================================
 
@@ -87,6 +209,7 @@ public class LeaveService {
                 leaveRepository.deleteLeave(id);
 
         if (!deleted) {
+
             throw new ResourceNotFoundException(
                     "Leave not found with id: " + id
             );
@@ -159,7 +282,7 @@ public class LeaveService {
 
 
     // =========================================================
-    // GET LEAVES BETWEEN DATES
+    // GET BETWEEN DATES
     // =========================================================
 
     public List<Leave> getLeavesBetweenDates(
@@ -193,10 +316,13 @@ public class LeaveService {
                         .findByUsername(username)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "User not found"
+                                        "User not found: "
+                                                + username
                                 ));
 
-        if (user.getEmployee() == null) {
+        if (user.getEmployee() == null ||
+                user.getEmployee().getEmployeeId() == null) {
+
             throw new ResourceNotFoundException(
                     "Employee not found"
             );

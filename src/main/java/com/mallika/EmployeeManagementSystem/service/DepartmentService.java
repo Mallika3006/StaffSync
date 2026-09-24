@@ -30,11 +30,13 @@ public class DepartmentService {
 
     // CREATE
     public Department createDepartment(Department department) {
+
         return departmentRepository.createDepartment(department);
     }
 
     // GET ALL
     public List<Department> getAllDepartments() {
+
         return departmentRepository.getAllDepartments();
     }
 
@@ -62,6 +64,7 @@ public class DepartmentService {
                 );
 
         if (updated == null) {
+
             throw new ResourceNotFoundException(
                     "Department not found with id: " + id
             );
@@ -79,6 +82,7 @@ public class DepartmentService {
                 departmentRepository.deleteDepartment(id);
 
         if (!deleted) {
+
             throw new ResourceNotFoundException(
                     "Department not found with id: " + id
             );
@@ -114,6 +118,7 @@ public class DepartmentService {
     // GET EMPLOYEE'S OWN DEPARTMENT
     public Department getDepartmentByUsername(String username) {
 
+        // 1. Find the logged-in user
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -121,7 +126,10 @@ public class DepartmentService {
                                         + username
                         ));
 
-        if (user.getEmployee() == null) {
+        // 2. Make sure employee is linked
+        if (user.getEmployee() == null ||
+                user.getEmployee().getEmployeeId() == null) {
+
             throw new ResourceNotFoundException(
                     "Employee not assigned to this user"
             );
@@ -130,6 +138,7 @@ public class DepartmentService {
         Integer employeeId =
                 user.getEmployee().getEmployeeId();
 
+        // 3. Find the employee's team
         Team team =
                 teamRepository.findByEmployeesEmployeeId(employeeId)
                         .orElseThrow(() ->
@@ -138,12 +147,25 @@ public class DepartmentService {
                                                 + employeeId
                                 ));
 
-        if (team.getDepartment() == null) {
+        // 4. Make sure the team has a department
+        if (team.getDepartment() == null ||
+                team.getDepartment().getDepartmentId() == null) {
+
             throw new ResourceNotFoundException(
                     "Department not assigned to this team"
             );
         }
 
-        return team.getDepartment();
+        // 5. Get the department ID
+        Integer departmentId =
+                team.getDepartment().getDepartmentId();
+
+        // 6. Fetch the COMPLETE department using JDBC
+        return departmentRepository.getDepartmentById(departmentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Department not found with id: "
+                                        + departmentId
+                        ));
     }
 }

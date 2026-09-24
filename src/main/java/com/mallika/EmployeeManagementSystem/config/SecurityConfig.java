@@ -17,183 +17,325 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
+
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            CustomUserDetailsService userDetailsService) throws Exception {
+            CustomUserDetailsService userDetailsService)
+            throws Exception {
 
         http
 
-                // CSRF disabled for now
+                // ==========================================
+                // CSRF
+                // ==========================================
+
                 .csrf(csrf -> csrf.disable())
 
-                // Authorization rules
+
+                // ==========================================
+                // AUTHORIZATION
+                // ==========================================
+
                 .authorizeHttpRequests(auth -> auth
 
-                        // LOGIN PAGES
+
+                        // ==========================================
+                        // LOGIN
+                        // ==========================================
+
                         .requestMatchers(
-                                "/admin-login",
-                                "/employee-login",
-                                "/perform-login",
+                                HttpMethod.GET,
                                 "/login"
                         ).permitAll()
 
-                        // First user creation
-                        .requestMatchers(HttpMethod.POST, "/users")
-                        .permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/login"
+                        ).permitAll()
 
+
+                        // ==========================================
+                        // STATIC FILES
+                        // ==========================================
+
+                        .requestMatchers(
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/style.css"
+                        ).permitAll()
+
+
+                        // ==========================================
+                        // FIRST USER CREATION
+                        // ==========================================
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/users"
+                        ).permitAll()
+
+
+                        // ==========================================
                         // DASHBOARDS
+                        // ==========================================
 
-                        // Only ADMIN
                         .requestMatchers("/admin-dashboard")
                         .hasRole("ADMIN")
 
-                        // Only HR
                         .requestMatchers("/hr-dashboard")
                         .hasRole("HR")
 
-                        // Only MANAGER
                         .requestMatchers("/manager-dashboard")
                         .hasRole("MANAGER")
 
-                        // EMPLOYEE + HR + MANAGER
                         .requestMatchers("/employee-dashboard")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
-                        // ADMIN
+
+                        // ==========================================
+                        // USERS
+                        // ==========================================
+
                         .requestMatchers("/users/**")
                         .hasRole("ADMIN")
 
+
                         // ==========================================
-                        // EMPLOYEE DASHBOARD - OWN DATA
-                        // EMPLOYEE + HR + MANAGER
+                        // OWN EMPLOYEE DATA
                         // ==========================================
 
                         .requestMatchers("/employees/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
-                        // Profile photo upload
                         .requestMatchers("/employees/me/photo")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/attendance/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
-
-                        .requestMatchers("/leaves/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/payrolls/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/projects/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/tasks/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/teams/me/members")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/departments/me")
-                        .hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER"
+                        )
+
+
+                        // ==========================================
+                        // LEAVES
+                        // ==========================================
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/leaves/me"
+                        )
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER",
+                                "ADMIN"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/leaves"
+                        )
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER",
+                                "ADMIN"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/leaves/*/withdraw"
+                        )
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER",
+                                "ADMIN"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/leaves/*"
+                        )
+                        .hasAnyRole(
+                                "EMPLOYEE",
+                                "HR",
+                                "MANAGER",
+                                "ADMIN"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/leaves/*"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "MANAGER"
+                        )
+
 
                         // ==========================================
                         // ADMIN + HR
                         // ==========================================
 
                         .requestMatchers("/employees/**")
-                        .hasAnyRole("ADMIN", "HR")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR"
+                        )
 
                         .requestMatchers("/departments/**")
-                        .hasAnyRole("ADMIN", "HR")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR"
+                        )
 
                         .requestMatchers("/designations/**")
-                        .hasAnyRole("ADMIN", "HR")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR"
+                        )
 
                         .requestMatchers("/attendance/**")
-                        .hasAnyRole("ADMIN", "HR")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR"
+                        )
 
                         .requestMatchers("/payrolls/**")
-                        .hasAnyRole("ADMIN", "HR")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR"
+                        )
+
 
                         // ==========================================
                         // ADMIN + HR + MANAGER
                         // ==========================================
 
                         .requestMatchers("/teams/**")
-                        .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/projects/**")
-                        .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/tasks/**")
-                        .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "MANAGER"
+                        )
 
                         .requestMatchers("/leaves/**")
-                        .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "MANAGER"
+                        )
 
+
+                        // ==========================================
                         // EVERYTHING ELSE
+                        // ==========================================
+
                         .anyRequest().authenticated()
                 )
 
-                // FORM LOGIN
-                .formLogin(form -> form
 
-                        .loginPage("/admin-login")
-
-                        .loginProcessingUrl("/perform-login")
-
-                        .successHandler((request, response, authentication) -> {
-
-                            String role = authentication.getAuthorities()
-                                    .iterator()
-                                    .next()
-                                    .getAuthority();
-
-                            if (role.equals("ROLE_ADMIN")) {
-
-                                response.sendRedirect("/admin-dashboard");
-
-                            } else if (role.equals("ROLE_HR")) {
-
-                                response.sendRedirect("/hr-dashboard");
-
-                            } else if (role.equals("ROLE_MANAGER")) {
-
-                                response.sendRedirect("/manager-dashboard");
-
-                            } else {
-
-                                response.sendRedirect("/employee-dashboard");
-                            }
-                        })
-
-                        .failureUrl("/admin-login?error=true")
-
-                        .permitAll()
-                )
-
+                // ==========================================
                 // JWT FILTER
+                // ==========================================
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
 
+
         return http.build();
     }
 
+
+    // ==========================================
     // PASSWORD ENCODER
+    // ==========================================
+
     @Bean
     public PasswordEncoder passwordEncoder() {
 
         return new BCryptPasswordEncoder();
     }
 
+
+    // ==========================================
     // AUTHENTICATION MANAGER
+    // ==========================================
+
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration)

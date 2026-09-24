@@ -1,35 +1,133 @@
 <!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Employee Login</title>
+    <meta charset="UTF-8">
+    <title>User Login</title>
+
+    <link rel="stylesheet" th:href="@{/style.css}">
 </head>
+
 <body>
 
-<h2>Employee Login</h2>
+<div class="login-container">
 
-<form th:action="@{/perform-login}" method="post">
+    <h2>User Login</h2>
 
-    <div>
-        <label>Username:</label>
-        <input type="text" name="username" required>
-    </div>
+    <p id="error-message" style="color: red;"></p>
 
-    <br>
+    <form id="loginForm">
 
-    <div>
-        <label>Password:</label>
-        <input type="password" name="password" required>
-    </div>
+        <div>
+            <label for="username">Username:</label>
+            <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required>
+        </div>
 
-    <br>
+        <br>
 
-    <button type="submit">Login</button>
+        <div>
+            <label for="password">Password:</label>
+            <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required>
+        </div>
 
-</form>
+        <br>
 
-<p th:if="${param.error}">
-    Invalid username or password
-</p>
+        <button type="submit">Login</button>
+
+    </form>
+
+</div>
+
+<script>
+
+    document.getElementById("loginForm").addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        const username =
+            document.getElementById("username").value;
+
+        const password =
+            document.getElementById("password").value;
+
+        const errorMessage =
+            document.getElementById("error-message");
+
+        errorMessage.textContent = "";
+
+        try {
+
+            const response = await fetch("/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+
+            });
+
+            if (!response.ok) {
+                throw new Error("Invalid username or password");
+            }
+
+            const data = await response.json();
+
+            // Store JWT token
+            localStorage.setItem("token", data.token);
+
+            // Store role
+            localStorage.setItem("role", data.role);
+
+            // Redirect according to role
+            if (data.role === "ROLE_ADMIN") {
+
+                window.location.href = "/admin-dashboard";
+
+            } else if (data.role === "ROLE_HR") {
+
+                window.location.href = "/hr-dashboard";
+
+            } else if (data.role === "ROLE_MANAGER") {
+
+                window.location.href = "/manager-dashboard";
+
+            } else if (data.role === "ROLE_EMPLOYEE") {
+
+                window.location.href = "/employee-dashboard";
+
+            } else {
+
+                errorMessage.textContent =
+                    "Invalid user role.";
+
+            }
+
+        } catch (error) {
+
+            errorMessage.textContent =
+                "Invalid username or password.";
+
+        }
+
+    });
+
+</script>
 
 </body>
+
 </html>

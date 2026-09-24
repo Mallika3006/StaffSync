@@ -271,6 +271,45 @@ public class LeaveRepository {
         );
     }
 
+    // =========================================================
+// WITHDRAW LEAVE
+// =========================================================
+
+    public Leave withdrawLeave(Integer id) {
+
+        String sql =
+                "SELECT * FROM withdraw_leave(?)";
+
+        try (Connection connection = dataSource.getConnection();
+             CallableStatement statement =
+                     connection.prepareCall(sql)) {
+
+            statement.setInt(1, id);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return mapLeave(resultSet);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            // TEMPORARY DEBUG
+            throw new RuntimeException(
+                    "Database error while withdrawing leave " +
+                            id + ": " +
+                            e.getMessage(),
+                    e
+            );
+        }
+
+        throw new RuntimeException(
+                "Leave could not be withdrawn. " +
+                        "Leave may not exist or may not be PENDING."
+        );
+    }
 
     // =========================================================
     // DELETE

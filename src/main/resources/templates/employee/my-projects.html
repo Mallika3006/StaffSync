@@ -15,8 +15,13 @@
     <h1>My Projects</h1>
 
     <div class="card" id="projects">
-        <p class="loading">Loading projects...</p>
+
+        <p class="loading">
+            Loading projects...
+        </p>
+
     </div>
+
 
     <a class="back-link" href="/employee-dashboard">
         ← Back to Dashboard
@@ -27,64 +32,210 @@
 
 <script>
 
+    // =========================================================
+    // LOAD MY PROJECTS
+    // =========================================================
+
     fetch('/projects/me')
+
         .then(response => {
 
             if (!response.ok) {
-                throw new Error("Failed to load projects");
+
+                throw new Error(
+                    "Failed to load projects"
+                );
+
             }
 
             return response.json();
+
         })
+
 
         .then(projectList => {
 
             const projectsDiv =
                 document.getElementById("projects");
 
+
+            // =====================================================
+            // NO PROJECTS
+            // =====================================================
+
             if (projectList.length === 0) {
 
                 projectsDiv.innerHTML =
-                    "<p class='empty-message'>No projects found.</p>";
+
+                    "<p class='empty-message'>" +
+                    "No projects found." +
+                    "</p>";
 
                 return;
             }
 
-            let html = `
-                <table>
 
-                    <tr>
-                        <th>Project ID</th>
-                        <th>Project Name</th>
-                        <th>Description</th>
-                    </tr>
+            // =====================================================
+            // SEPARATE COMPLETED AND NOT COMPLETED
+            // =====================================================
+
+            const today =
+                new Date().toISOString().split("T")[0];
+
+
+            const completedProjects =
+                projectList.filter(project =>
+
+                    project.endDate &&
+                    project.endDate < today
+
+                );
+
+
+            const notCompletedProjects =
+                projectList.filter(project =>
+
+                    !project.endDate ||
+                    project.endDate >= today
+
+                );
+
+
+            // =====================================================
+            // CREATE PROJECT TABLE
+            // =====================================================
+
+            function createProjectTable(projects) {
+
+                if (projects.length === 0) {
+
+                    return `
+                        <p class="empty-message">
+                            No projects in this section.
+                        </p>
+                    `;
+
+                }
+
+
+                let html = `
+
+                    <table>
+
+                        <tr>
+
+                            <th>Project ID</th>
+
+                            <th>Project Name</th>
+
+                            <th>Start Date</th>
+
+                            <th>End Date</th>
+
+                        </tr>
+
+                `;
+
+
+                projects.forEach(project => {
+
+                    html += `
+
+                        <tr>
+
+                            <td>
+                                ${project.projectId}
+                            </td>
+
+                            <td>
+                                ${project.projectName}
+                            </td>
+
+                            <td>
+                                ${project.startDate ?? "-"}
+                            </td>
+
+                            <td>
+                                ${project.endDate ?? "-"}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                });
+
+
+                html += `</table>`;
+
+                return html;
+
+            }
+
+
+            // =====================================================
+            // DISPLAY SECTIONS
+            // =====================================================
+
+            let html = `
+
+                <h3>My Project Records</h3>
+
+
+                <details>
+
+                    <summary>
+                        Completed
+                    </summary>
+
+                    ${createProjectTable(
+                completedProjects
+            )}
+
+                </details>
+
+
+                <br>
+
+
+                <details>
+
+                    <summary>
+                        Not Completed
+                    </summary>
+
+                    ${createProjectTable(
+                notCompletedProjects
+            )}
+
+                </details>
+
             `;
 
-            projectList.forEach(project => {
-
-                html += `
-                    <tr>
-                        <td>${project.projectId}</td>
-                        <td>${project.projectName}</td>
-                        <td>${project.description}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</table>`;
 
             projectsDiv.innerHTML = html;
+
         })
+
+
+        // =========================================================
+        // ERROR HANDLING
+        // =========================================================
 
         .catch(error => {
 
             document.getElementById("projects").innerHTML =
-                "<p class='error-message'>Unable to load projects.</p>";
+
+                "<p class='error-message'>" +
+                "Unable to load projects." +
+                "</p>";
 
             console.error(error);
+
         });
 
 </script>
 
 </body>
+
 </html>

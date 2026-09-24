@@ -30,16 +30,18 @@ public class DepartmentRepository {
             statement.setString(2, department.getLocation());
             statement.setString(3, department.getDescription());
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            if (rs.next()) {
-                return mapDepartment(rs);
+                if (rs.next()) {
+                    return mapDepartment(rs);
+                }
             }
 
             return null;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error creating department", e);
+            throw new RuntimeException(
+                    "Error creating department", e);
         }
     }
 
@@ -61,7 +63,8 @@ public class DepartmentRepository {
             return departments;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching departments", e);
+            throw new RuntimeException(
+                    "Error fetching departments", e);
         }
     }
 
@@ -75,16 +78,18 @@ public class DepartmentRepository {
 
             statement.setInt(1, id);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            if (rs.next()) {
-                return Optional.of(mapDepartment(rs));
+                if (rs.next()) {
+                    return Optional.of(mapDepartment(rs));
+                }
             }
 
             return Optional.empty();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching department by id", e);
+            throw new RuntimeException(
+                    "Error fetching department by id: " + id, e);
         }
     }
 
@@ -103,16 +108,18 @@ public class DepartmentRepository {
             statement.setString(3, department.getLocation());
             statement.setString(4, department.getDescription());
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            if (rs.next()) {
-                return mapDepartment(rs);
+                if (rs.next()) {
+                    return mapDepartment(rs);
+                }
             }
 
             return null;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating department", e);
+            throw new RuntimeException(
+                    "Error updating department with id: " + id, e);
         }
     }
 
@@ -126,12 +133,14 @@ public class DepartmentRepository {
 
             statement.setInt(1, id);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            return rs.next() && rs.getBoolean(1);
+                return rs.next() && rs.getBoolean(1);
+            }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting department", e);
+            throw new RuntimeException(
+                    "Error deleting department with id: " + id, e);
         }
     }
 
@@ -148,16 +157,18 @@ public class DepartmentRepository {
 
             statement.setString(1, name);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            while (rs.next()) {
-                departments.add(mapDepartment(rs));
+                while (rs.next()) {
+                    departments.add(mapDepartment(rs));
+                }
             }
 
             return departments;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error searching departments", e);
+            throw new RuntimeException(
+                    "Error searching departments by name", e);
         }
     }
 
@@ -172,10 +183,11 @@ public class DepartmentRepository {
 
             statement.setString(1, name);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            if (rs.next()) {
-                return Optional.of(mapDepartment(rs));
+                if (rs.next()) {
+                    return Optional.of(mapDepartment(rs));
+                }
             }
 
             return Optional.empty();
@@ -190,7 +202,8 @@ public class DepartmentRepository {
     public List<Department> findByLocationContainingIgnoreCase(
             String location) {
 
-        String sql = "SELECT * FROM search_departments_by_location(?)";
+        String sql =
+                "SELECT * FROM search_departments_by_location(?)";
 
         List<Department> departments = new ArrayList<>();
 
@@ -199,10 +212,11 @@ public class DepartmentRepository {
 
             statement.setString(1, location);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet rs = statement.executeQuery()) {
 
-            while (rs.next()) {
-                departments.add(mapDepartment(rs));
+                while (rs.next()) {
+                    departments.add(mapDepartment(rs));
+                }
             }
 
             return departments;

@@ -269,3 +269,38 @@ ORDER BY from_date, leave_id;
 
 END;
 $$;
+
+--withdraw leaves
+
+CREATE OR REPLACE FUNCTION withdraw_leave(
+    p_leave_id INTEGER
+)
+RETURNS TABLE (
+    leave_id INTEGER,
+    from_date DATE,
+    to_date DATE,
+    reason VARCHAR(255),
+    status VARCHAR,
+    employee_id INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+RETURN QUERY
+
+UPDATE leaves
+SET status = 'WITHDRAWN'
+WHERE leaves.leave_id = p_leave_id
+  AND UPPER(leaves.status) = 'PENDING'
+
+    RETURNING
+        leaves.leave_id,
+        leaves.from_date,
+        leaves.to_date,
+        leaves.reason,
+        leaves.status,
+        leaves.employee_id;
+
+END;
+$$;
