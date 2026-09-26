@@ -101,16 +101,51 @@ public class EmployeeService {
 
 
     // =========================
-    // UPDATE
-    // =========================
+// UPDATE EMPLOYEE
+// =========================
 
     public Employee updateEmployee(
             Integer id,
             Employee employeeDetails) {
 
-        // Will be converted to CallableStatement later.
-        throw new UnsupportedOperationException(
-                "Update employee will be converted to stored procedure"
+        EmployeeUpdateDTO updateDetails =
+                new EmployeeUpdateDTO();
+
+        updateDetails.setFirstName(
+                employeeDetails.getFirstName()
+        );
+
+        updateDetails.setLastName(
+                employeeDetails.getLastName()
+        );
+
+        updateDetails.setEmail(
+                employeeDetails.getEmail()
+        );
+
+        updateDetails.setPhone(
+                employeeDetails.getPhone()
+        );
+
+        updateDetails.setDateOfBirth(
+                employeeDetails.getDateOfBirth()
+        );
+
+        updateDetails.setAddress(
+                employeeDetails.getAddress()
+        );
+
+        // Keep existing profile photo
+        Employee existingEmployee =
+                getEmployeeById(id);
+
+        updateDetails.setProfilePhoto(
+                existingEmployee.getProfilePhoto()
+        );
+
+        return employeeRepository.updateMyProfile(
+                id,
+                updateDetails
         );
     }
 

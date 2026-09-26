@@ -51,7 +51,8 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/login"
+                                "/admin-login",
+                                "/user-login"
                         ).permitAll()
 
                         .requestMatchers(
@@ -101,6 +102,14 @@ public class SecurityConfig {
                                 "HR",
                                 "MANAGER"
                         )
+
+
+                        // ==========================================
+                        // HR PAGES
+                        // ==========================================
+
+                        .requestMatchers("/hr/**")
+                        .hasRole("HR")
 
 
                         // ==========================================
@@ -304,6 +313,22 @@ public class SecurityConfig {
                         // ==========================================
 
                         .anyRequest().authenticated()
+                )
+
+
+                // ==========================================
+                // LOGOUT
+                // ==========================================
+
+                .logout(logout -> logout
+
+                        .logoutUrl("/logout")
+
+                        .logoutSuccessUrl("/user-login")
+
+                        .deleteCookies("jwt")
+
+                        .invalidateHttpSession(true)
                 )
 
 

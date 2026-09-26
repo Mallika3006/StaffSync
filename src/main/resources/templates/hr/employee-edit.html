@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Edit Employee - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Edit Employee</h1>
+
+    <div class="card">
+
+        <form id="employeeForm">
+
+            <label>First Name</label>
+            <input
+                    type="text"
+                    id="firstName"
+                    required>
+
+            <br><br>
+
+            <label>Last Name</label>
+            <input
+                    type="text"
+                    id="lastName"
+                    required>
+
+            <br><br>
+
+            <label>Email</label>
+            <input
+                    type="email"
+                    id="email"
+                    required>
+
+            <br><br>
+
+            <label>Phone</label>
+            <input
+                    type="text"
+                    id="phone">
+
+            <br><br>
+
+            <label>Date of Birth</label>
+            <input
+                    type="date"
+                    id="dateOfBirth">
+
+            <br><br>
+
+            <label>Address</label>
+            <textarea
+                    id="address"
+                    rows="3"></textarea>
+
+            <br><br>
+
+            <button
+                    type="submit"
+                    class="btn">
+                Update Employee
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+
+    </div>
+
+    <br>
+
+    <a
+            class="back-link"
+            id="backToDetails">
+        ← Back to Employee Details
+    </a>
+
+    <br><br>
+
+    <a
+            class="back-link"
+            href="/hr/employees">
+        ← Back to Employees
+    </a>
+
+</div>
+
+
+<script>
+
+    // Get employee ID from URL
+    const pathParts =
+        window.location.pathname.split("/");
+
+    const employeeId =
+        pathParts[pathParts.length - 2];
+
+
+    // Back to details
+    document.getElementById("backToDetails").href =
+        `/hr/employees/${employeeId}`;
+
+
+    // =========================
+    // LOAD EMPLOYEE
+    // =========================
+
+    fetch(`/employees/${employeeId}`)
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load employee"
+                );
+            }
+
+            return response.json();
+        })
+
+        .then(employee => {
+
+            document.getElementById("firstName").value =
+                employee.firstName || "";
+
+            document.getElementById("lastName").value =
+                employee.lastName || "";
+
+            document.getElementById("email").value =
+                employee.email || "";
+
+            document.getElementById("phone").value =
+                employee.phone || "";
+
+            document.getElementById("dateOfBirth").value =
+                employee.dateOfBirth || "";
+
+            document.getElementById("address").value =
+                employee.address || "";
+
+        })
+
+        .catch(error => {
+
+            document.getElementById("message").innerText =
+                "Unable to load employee details.";
+
+            console.error(error);
+        });
+
+
+    // =========================
+    // UPDATE EMPLOYEE
+    // =========================
+
+    document.getElementById("employeeForm")
+        .addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const employee = {
+
+                firstName:
+                document.getElementById("firstName").value,
+
+                lastName:
+                document.getElementById("lastName").value,
+
+                email:
+                document.getElementById("email").value,
+
+                phone:
+                document.getElementById("phone").value,
+
+                dateOfBirth:
+                    document.getElementById("dateOfBirth").value
+                    || null,
+
+                address:
+                document.getElementById("address").value
+
+            };
+
+
+            fetch(`/employees/${employeeId}`, {
+
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(employee)
+
+            })
+
+                .then(response => {
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "Failed to update employee"
+                        );
+                    }
+
+                    return response.json();
+                })
+
+                .then(updatedEmployee => {
+
+                    document.getElementById("message")
+                        .innerText =
+                        "Employee updated successfully.";
+
+                    // Go back to details page
+                    setTimeout(() => {
+
+                        window.location.href =
+                            `/hr/employees/${employeeId}`;
+
+                    }, 800);
+
+                })
+
+                .catch(error => {
+
+                    document.getElementById("message")
+                        .innerText =
+                        "Failed to update employee.";
+
+                    console.error(error);
+                });
+
+        });
+
+</script>
+
+</body>
+</html>

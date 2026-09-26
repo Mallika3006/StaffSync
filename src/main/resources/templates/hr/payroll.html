@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>HR Payroll - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>My Payroll</h1>
+
+    <div class="card" id="payroll">
+        <p class="loading">Loading payroll...</p>
+    </div>
+
+    <br>
+
+    <a class="back-link" href="/hr-dashboard">
+        ← Back to HR Dashboard
+    </a>
+
+</div>
+
+<script>
+
+    fetch('/payrolls/me')
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Failed to load payroll");
+            }
+
+            return response.json();
+        })
+
+        .then(payroll => {
+
+            const container =
+                document.getElementById("payroll");
+
+            if (!payroll || payroll.length === 0) {
+
+                container.innerHTML =
+                    "<p>No payroll records found.</p>";
+
+                return;
+            }
+
+            container.innerHTML = `
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Payroll ID</th>
+                            <th>Month</th>
+                            <th>Year</th>
+                            <th>Basic Salary</th>
+                            <th>Allowances</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        ${payroll.map(record => `
+
+                            <tr>
+
+                                <td>
+                                    ${record.payrollId ?? "N/A"}
+                                </td>
+
+                                <td>
+                                    ${record.month ?? "N/A"}
+                                </td>
+
+                                <td>
+                                    ${record.year ?? "N/A"}
+                                </td>
+
+                                <td>
+                                    ${record.basicSalary ?? "N/A"}
+                                </td>
+
+                                <td>
+                                    ${record.allowances ?? "N/A"}
+                                </td>
+
+                                <td>
+                                    ${record.deductions ?? "N/A"}
+                                </td>
+
+                                <td>
+                                    ${record.netSalary ?? "N/A"}
+                                </td>
+
+                            </tr>
+
+                        `).join("")}
+
+                    </tbody>
+
+                </table>
+            `;
+        })
+
+        .catch(error => {
+
+            document.getElementById("payroll").innerHTML =
+                "<p class='error-message'>Unable to load payroll.</p>";
+
+            console.error(error);
+        });
+
+</script>
+
+</body>
+</html>

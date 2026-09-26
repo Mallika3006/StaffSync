@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - StaffSync</title>
+
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <h2>Admin Login</h2>
+
+    <p id="error-message" style="color: red;"></p>
+
+    <form id="loginForm">
+
+        <div>
+            <label for="username">Username:</label>
+
+            <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required>
+        </div>
+
+        <br>
+
+        <div>
+            <label for="password">Password:</label>
+
+            <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required>
+        </div>
+
+        <br>
+
+        <button type="submit">Login</button>
+
+    </form>
+
+</div>
+
+<script>
+
+    document.getElementById("loginForm")
+        .addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            const username =
+                document.getElementById("username").value;
+
+            const password =
+                document.getElementById("password").value;
+
+            const errorMessage =
+                document.getElementById("error-message");
+
+            errorMessage.textContent = "";
+
+            try {
+
+                const response = await fetch("/login", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+
+                });
+
+                if (!response.ok) {
+                    throw new Error("Login failed");
+                }
+
+                const data = await response.json();
+
+                // Only ADMIN can use Admin Login
+                if (data.role !== "ROLE_ADMIN") {
+
+                    errorMessage.textContent =
+                        "Only Admin users can login here.";
+
+                    return;
+                }
+
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("role", data.role);
+
+                window.location.href =
+                    "/admin-dashboard";
+
+            } catch (error) {
+
+                errorMessage.textContent =
+                    "Invalid username or password.";
+
+            }
+
+        });
+
+</script>
+
+</body>
+
+</html>

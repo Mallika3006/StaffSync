@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>HR Leaves - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>My Leaves</h1>
+
+    <!-- Apply Leave -->
+    <div class="card">
+        <h2>Apply for Leave</h2>
+
+        <form id="leaveForm">
+
+            <label for="fromDate">From Date:</label>
+            <input type="date" id="fromDate" required>
+
+            <br><br>
+
+            <label for="toDate">To Date:</label>
+            <input type="date" id="toDate" required>
+
+            <br><br>
+
+            <label for="reason">Reason:</label>
+            <textarea id="reason" required></textarea>
+
+            <br><br>
+
+            <button type="submit" class="btn">
+                Apply for Leave
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <br>
+
+    <!-- Leave Records -->
+    <div class="card">
+
+        <h2>My Leave Records</h2>
+
+        <div id="leaveRecords">
+            <p class="loading">Loading leave records...</p>
+        </div>
+
+    </div>
+
+    <br>
+
+    <a class="back-link" href="/hr-dashboard">
+        ← Back to HR Dashboard
+    </a>
+
+</div>
+
+<script>
+
+    // ==============================
+    // LOAD MY LEAVES
+    // ==============================
+
+    function loadLeaves() {
+
+        fetch('/leaves/me')
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error("Failed to load leaves");
+                }
+
+                return response.json();
+            })
+
+            .then(leaves => {
+
+                const container =
+                    document.getElementById("leaveRecords");
+
+                if (!leaves || leaves.length === 0) {
+
+                    container.innerHTML =
+                        "<p>No leave records found.</p>";
+
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            ${leaves.map(leave => `
+
+                                <tr>
+
+                                    <td>
+                                        ${leave.fromDate ?? "N/A"}
+                                    </td>
+
+                                    <td>
+                                        ${leave.toDate ?? "N/A"}
+                                    </td>
+
+                                    <td>
+                                        ${leave.reason ?? "N/A"}
+                                    </td>
+
+                                    <td>
+                                        ${leave.status ?? "PENDING"}
+                                    </td>
+
+                                    <td>
+
+                                        ${
+                    leave.status === "PENDING"
+                        ?
+                        `<button
+                                                class="btn"
+                                                onclick="withdrawLeave(${leave.leaveId})">
+                                                Withdraw
+                                             </button>`
+                        :
+                        "-"
+                }
+
+                                    </td>
+
+                                </tr>
+
+                            `).join("")}
+
+                        </tbody>
+
+                    </table>
+                `;
+            })
+
+            .catch(error => {
+
+                document.getElementById("leaveRecords").innerHTML =
+                    "<p class='error-message'>Unable to load leave records.</p>";
+
+                console.error(error);
+            });
+    }
+
+
+    // ==============================
+    // APPLY FOR LEAVE
+    // ==============================
+
+    document.getElementById("leaveForm")
+        .addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const leaveData = {
+
+                fromDate:
+                document.getElementById("fromDate").value,
+
+                toDate:
+                document.getElementById("toDate").value,
+
+                reason:
+                document.getElementById("reason").value
+            };
+
+            fetch('/leaves', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify(leaveData)
+
+            })
+
+                .then(response => {
+
+                    if (!response.ok) {
+                        throw new Error("Failed to apply leave");
+                    }
+
+                    return response.json();
+                })
+
+                .then(data => {
+
+                    document.getElementById("message").innerText =
+                        "Leave applied successfully.";
+
+                    document.getElementById("leaveForm").reset();
+
+                    loadLeaves();
+                })
+
+                .catch(error => {
+
+                    document.getElementById("message").innerText =
+                        "Unable to apply leave.";
+
+                    console.error(error);
+                });
+
+        });
+
+
+    // ==============================
+    // WITHDRAW LEAVE
+    // ==============================
+
+    function withdrawLeave(leaveId) {
+
+        fetch(`/leaves/${leaveId}/withdraw`, {
+
+            method: 'PUT'
+
+        })
+
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error("Failed to withdraw leave");
+                }
+
+                return response.json();
+            })
+
+            .then(data => {
+
+                loadLeaves();
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+                alert("Unable to withdraw leave.");
+            });
+    }
+
+
+    // ==============================
+    // INITIAL LOAD
+    // ==============================
+
+    loadLeaves();
+
+</script>
+
+</body>
+</html>

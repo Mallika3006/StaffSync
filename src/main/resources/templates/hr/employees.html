@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>HR Employees - StaffSync</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Employee Management</h1>
+
+    <!-- SEARCH -->
+    <div class="card">
+
+        <h2>Search Employee</h2>
+
+        <input
+                type="text"
+                id="searchName"
+                placeholder="Enter employee name">
+
+        <button
+                class="btn"
+                onclick="searchEmployees()">
+            Search
+        </button>
+
+        <button
+                class="btn"
+                onclick="loadEmployees()">
+            Show All
+        </button>
+
+    </div>
+
+    <br>
+
+    <!-- EMPLOYEE LIST -->
+    <div class="card">
+
+        <div id="employees">
+            <p class="loading">Loading employees...</p>
+        </div>
+
+    </div>
+
+    <br>
+
+    <a class="back-link" href="/hr-dashboard">
+        ← Back to HR Dashboard
+    </a>
+
+</div>
+
+
+<script>
+
+    // ==========================================
+    // DISPLAY EMPLOYEES
+    // ==========================================
+
+    function displayEmployees(employees) {
+
+        const container =
+            document.getElementById("employees");
+
+        if (!employees || employees.length === 0) {
+
+            container.innerHTML =
+                "<p>No employees found.</p>";
+
+            return;
+        }
+
+        container.innerHTML = `
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Hire Date</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${employees.map(employee => `
+
+                        <tr>
+
+                            <td>
+                                ${employee.employeeId ?? "N/A"}
+                            </td>
+
+                            <td>
+                                ${employee.firstName || "N/A"}
+                            </td>
+
+                            <td>
+                                ${employee.lastName || "N/A"}
+                            </td>
+
+                            <td>
+                                ${employee.email || "N/A"}
+                            </td>
+
+                            <td>
+                                ${employee.phone || "N/A"}
+                            </td>
+
+                            <td>
+                                ${employee.hireDate ?? "N/A"}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="btn"
+                                    onclick="viewEmployee(${employee.employeeId})">
+                                    View
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    `).join("")}
+
+                </tbody>
+
+            </table>
+        `;
+    }
+
+
+    // ==========================================
+    // LOAD ALL EMPLOYEES
+    // ==========================================
+
+    function loadEmployees() {
+
+        document.getElementById("employees").innerHTML =
+            "<p class='loading'>Loading employees...</p>";
+
+        fetch('/employees')
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error("Failed to load employees");
+                }
+
+                return response.json();
+            })
+
+            .then(employees => {
+
+                displayEmployees(employees);
+
+            })
+
+            .catch(error => {
+
+                document.getElementById("employees").innerHTML =
+                    "<p class='error-message'>Unable to load employees.</p>";
+
+                console.error(error);
+            });
+    }
+
+
+    // ==========================================
+    // SEARCH EMPLOYEES
+    // ==========================================
+
+    function searchEmployees() {
+
+        const name =
+            document.getElementById("searchName").value.trim();
+
+        if (name === "") {
+
+            loadEmployees();
+            return;
+        }
+
+        document.getElementById("employees").innerHTML =
+            "<p class='loading'>Searching...</p>";
+
+        fetch(`/employees/search?name=${encodeURIComponent(name)}`)
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error("Search failed");
+                }
+
+                return response.json();
+            })
+
+            .then(employees => {
+
+                displayEmployees(employees);
+
+            })
+
+            .catch(error => {
+
+                document.getElementById("employees").innerHTML =
+                    "<p class='error-message'>Unable to search employees.</p>";
+
+                console.error(error);
+            });
+    }
+
+
+    // ==========================================
+    // VIEW EMPLOYEE
+    // ==========================================
+    function viewEmployee(employeeId) {
+
+        window.location.href =
+            `/hr/employees/${employeeId}`;
+    }
+
+
+    // ==========================================
+    // INITIAL LOAD
+    // ==========================================
+
+    loadEmployees();
+
+</script>
+
+</body>
+</html>

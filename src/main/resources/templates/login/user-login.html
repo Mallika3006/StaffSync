@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Login - StaffSync</title>
+
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <h2>User Login</h2>
+
+    <p id="error-message" style="color: red;"></p>
+
+    <form id="loginForm">
+
+        <div>
+            <label for="username">Username:</label>
+
+            <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required>
+        </div>
+
+        <br>
+
+        <div>
+            <label for="password">Password:</label>
+
+            <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required>
+        </div>
+
+        <br>
+
+        <button type="submit">Login</button>
+
+    </form>
+
+</div>
+
+
+<script>
+
+    document.getElementById("loginForm")
+        .addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            const username =
+                document.getElementById("username").value;
+
+            const password =
+                document.getElementById("password").value;
+
+            const errorMessage =
+                document.getElementById("error-message");
+
+            errorMessage.textContent = "";
+
+            try {
+
+                // ==========================================
+                // LOGIN REQUEST
+                // ==========================================
+
+                const response = await fetch("/login", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+
+                });
+
+                const data =
+                    await response.json();
+
+
+                // ==========================================
+                // LOGIN FAILED
+                // ==========================================
+
+                if (!response.ok) {
+
+                    errorMessage.textContent =
+                        "Invalid username or password.";
+
+                    return;
+                }
+
+
+                // ==========================================
+                // ADMIN CANNOT USE USER LOGIN
+                // ==========================================
+
+                if (data.role === "ROLE_ADMIN") {
+
+                    errorMessage.textContent =
+                        "Admin users must use Admin Login.";
+
+                    return;
+                }
+
+
+                // ==========================================
+                // CHECK USER ROLE
+                // ==========================================
+
+                if (
+                    data.role !== "ROLE_EMPLOYEE" &&
+                    data.role !== "ROLE_HR" &&
+                    data.role !== "ROLE_MANAGER"
+                ) {
+
+                    errorMessage.textContent =
+                        "Invalid user role.";
+
+                    return;
+                }
+
+
+                // ==========================================
+                // STORE JWT IN COOKIE
+                // ==========================================
+
+                document.cookie =
+                    "jwt=" +
+                    data.token +
+                    "; path=/; SameSite=Lax";
+
+                // Store role for frontend use
+                localStorage.setItem(
+                    "role",
+                    data.role
+                );
+
+
+                // ==========================================
+                // DEBUG
+                // ==========================================
+
+                console.log(
+                    "Login successful"
+                );
+
+                console.log(
+                    "Role:",
+                    data.role
+                );
+
+                console.log(
+                    "JWT cookie created"
+                );
+
+                console.log(
+                    "Cookies:",
+                    document.cookie
+                );
+
+
+                // ==========================================
+                // REDIRECT BASED ON ROLE
+                // ==========================================
+
+                if (data.role === "ROLE_HR") {
+
+                    window.location.href =
+                        "/hr-dashboard";
+
+                }
+
+                else if (data.role === "ROLE_MANAGER") {
+
+                    window.location.href =
+                        "/manager-dashboard";
+
+                }
+
+                else {
+
+                    window.location.href =
+                        "/employee-dashboard";
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
+
+                errorMessage.textContent =
+                    "Login request failed.";
+
+            }
+
+        });
+
+</script>
+
+</body>
+
+</html>

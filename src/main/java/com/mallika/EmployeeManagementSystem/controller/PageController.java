@@ -1,23 +1,16 @@
 package com.mallika.EmployeeManagementSystem.controller;
 
-import ch.qos.logback.core.model.Model;
-import com.mallika.EmployeeManagementSystem.model.Employee;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.ui.Model;
 
 @Controller
 public class PageController {
 
-    @GetMapping("/admin-login")
-    public String adminLogin() {
-        return "login/admin-login";
-    }
-
-    @GetMapping("/employee-login")
-    public String employeeLogin() {
-        return "login/employee-login";
-    }
+    // ==========================================
+    // DASHBOARDS
+    // ==========================================
 
     @GetMapping("/employee-dashboard")
     public String employeeDashboard() {
@@ -38,6 +31,11 @@ public class PageController {
     public String managerDashboard() {
         return "dashboard/manager";
     }
+
+
+    // ==========================================
+    // EMPLOYEE FEATURES
+    // ==========================================
 
     @GetMapping("/my-profile")
     public String myProfile() {
@@ -79,9 +77,127 @@ public class PageController {
         return "employee/my-department";
     }
 
+
+    // ==========================================
+    // EDIT PROFILE
+    // ==========================================
+
     @GetMapping("/employee-profile/edit")
     public String editEmployeeProfile() {
         return "employee/employee-profile-edit";
     }
 
+    // ==========================================
+// HR FEATURES
+// ==========================================
+
+    @GetMapping("/hr/profile")
+    public String hrProfile() {
+        return "hr/profile";
+    }
+
+    @GetMapping("/hr/attendance")
+    public String hrAttendance() {
+        return "hr/attendance";
+    }
+
+    @GetMapping("/hr/leaves")
+    public String hrLeaves() {
+        return "hr/leaves";
+    }
+
+    @GetMapping("/hr/payroll")
+    public String hrPayroll() {
+        return "hr/payroll";
+    }
+
+    @GetMapping("/hr/employees")
+    public String hrEmployees() {
+        return "hr/employees";
+    }
+
+    @GetMapping("/hr/employees/{id}")
+    public String hrEmployeeDetails() {
+        return "hr/employee-details";
+    }
+
+    @GetMapping("/hr/employees/{id}/edit")
+    public String editHrEmployee() {
+        return "hr/employee-edit";
+    }
+
+    @GetMapping("/hr/departments")
+    public String hrDepartments() {
+        return "hr/departments";
+    }
+
+    @GetMapping("/hr/departments/{id}")
+    public String hrDepartmentDetails() {
+        return "hr/department-details";
+    }
+
+    @GetMapping("/hr/departments/{id}/edit")
+    public String editHrDepartment() {
+        return "hr/department-edit";
+    }
+
+    @GetMapping("/hr/designations")
+    public String hrDesignations() {
+        return "hr/designations";
+    }
+
+    @GetMapping("/hr/designations/{id}")
+    public String hrDesignationDetails() {
+        return "hr/designation-details";
+    }
+
+    @GetMapping("/hr/designations/{id}/edit")
+    public String editHrDesignation() {
+        return "hr/designation-edit";
+    }
+
+    @GetMapping("/hr/teams")
+    public String hrTeams() {
+        return "hr/teams";
+    }
+
+    @GetMapping("/hr/teams/{id}")
+    public String hrTeamDetails(
+            @PathVariable Integer id,
+            Model model) {
+
+        model.addAttribute("teamId", id);
+        return "hr/team-details";
+    }
+
+    @GetMapping("/hr/teams/{id}/edit")
+    public String editHrTeam(@PathVariable Integer id, Model model) {
+        model.addAttribute("teamId", id);
+        return "hr/team-edit";
+    }
+
+    @GetMapping("/hr/projects")
+    public String hrProjects() {
+        return "hr/projects";
+    }
+
+    @GetMapping("/hr/projects/{id}")
+    public String hrProjectDetails(
+            @PathVariable Integer id,
+            Model model) {
+
+        model.addAttribute("projectId", id);
+
+        return "hr/project-details";
+    }
+
+    @GetMapping("/hr/projects/{id}/edit")
+    public String editHrProject(
+            @PathVariable Integer id,
+            Model model) {
+
+        model.addAttribute("projectId", id);
+
+        return "hr/project-edit";
+    }
 }

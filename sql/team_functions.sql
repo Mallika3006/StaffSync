@@ -181,13 +181,13 @@ $$;
 CREATE OR REPLACE FUNCTION get_team_by_employee(
     p_employee_id INTEGER
 )
-RETURNS SETOF team
+RETURNS SETOF teams
 LANGUAGE plpgsql
 AS $$
 BEGIN
 RETURN QUERY
 SELECT t.*
-FROM team t
+FROM teams t
          JOIN employees e
               ON e.team_id = t.team_id
 WHERE e.employee_id = p_employee_id;

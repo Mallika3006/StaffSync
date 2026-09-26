@@ -25,13 +25,33 @@ public class LoginController {
         this.jwtService = jwtService;
     }
 
-    // Show login page
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login/login";
+    // ==========================================
+    // ADMIN LOGIN PAGE
+    // ==========================================
+
+    @GetMapping("/admin-login")
+    public String adminLoginPage() {
+        System.out.println(">>> ADMIN LOGIN PAGE REACHED");
+
+        return "login/admin-login";
     }
 
-    // Authenticate user
+
+    // ==========================================
+    // USER LOGIN PAGE
+    // ==========================================
+
+    @GetMapping("/user-login")
+    public String userLoginPage() {
+        System.out.println(">>> USER LOGIN PAGE REACHED");
+        return "login/user-login";
+    }
+
+
+    // ==========================================
+    // AUTHENTICATE USER
+    // ==========================================
+
     @PostMapping("/login")
     @ResponseBody
     public Map<String, String> login(
